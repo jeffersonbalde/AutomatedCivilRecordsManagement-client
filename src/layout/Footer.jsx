@@ -1,0 +1,24 @@
+import React from 'react';
+
+const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className="py-4 bg-light mt-auto">
+      <div className="container-fluid px-4">
+        <div className="d-flex align-items-center justify-content-between small">
+          <div className="text-muted">
+            &copy; {currentYear} Automated Civil Records Management & Certification Issuance System. All rights reserved.
+          </div>
+          <div className="text-muted">
+            <span className="mx-1">v1.0.0</span>
+            <span className="mx-1">•</span>
+            <span>Pagadian City Civil Registry</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
