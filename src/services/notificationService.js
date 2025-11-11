@@ -61,7 +61,12 @@ export const showAlert = {
   },
 
   // Info alert
-  info: (title, htmlContent = "", confirmButtonText = "Close", timer = null) => {
+  info: (
+    title,
+    htmlContent = "",
+    confirmButtonText = "Close",
+    timer = null
+  ) => {
     return Swal.fire({
       title,
       html: htmlContent,
@@ -78,7 +83,12 @@ export const showAlert = {
   },
 
   // Confirmation dialog
-  confirm: (title, text = "", confirmButtonText = "Yes", cancelButtonText = "Cancel") => {
+  confirm: (
+    title,
+    text = "",
+    confirmButtonText = "Yes",
+    cancelButtonText = "Cancel"
+  ) => {
     return Swal.fire({
       title,
       text,
@@ -115,14 +125,14 @@ export const showAlert = {
     return Swal.fire({
       title: title,
       text: text,
-      icon: 'info',
+      icon: "info",
       showConfirmButton: false,
       allowOutsideClick: false,
       allowEscapeKey: false,
       allowEnterKey: false,
       didOpen: () => {
         Swal.showLoading();
-      }
+      },
     });
   },
 
@@ -167,6 +177,7 @@ export const showToast = {
         border: "1px solid #e6f7f7",
         borderRadius: "8px",
         fontWeight: "500",
+        zIndex: 99999, // Force higher z-index
       },
       progressStyle: {
         background: theme.primary,

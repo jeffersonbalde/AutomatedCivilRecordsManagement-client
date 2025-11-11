@@ -1006,6 +1006,8 @@ export const Step7InformantInfo = ({ formData, errors, onChange }) => (
   </div>
 );
 
+// Update the Step8Finalize component in BirthRecordStepComponents.jsx
+
 // Step 8: Finalize and Review
 export const Step8Finalize = ({ formData }) => {
   const formatDate = (dateString) => {
@@ -1034,115 +1036,178 @@ export const Step8Finalize = ({ formData }) => {
         Once submitted, the record will be updated in the system.
       </div>
 
-      <div className="row g-4">
-        {/* Child Information Summary */}
+      <div className="row g-3">
+        {/* Child Information */}
         <div className="col-12">
-          <div className="card border-0 bg-light">
-            <div className="card-header bg-primary bg-opacity-10">
-              <h6 className="mb-0 text-primary">
-                <i className="fas fa-baby me-2"></i>
+          <div className="card border-0 bg-white">
+            <div 
+              className="card-header border-bottom bg-white"
+              style={{ 
+                borderColor: 'rgba(1, 129, 129, 0.2)',
+                padding: '0.75rem 1rem'
+              }}
+            >
+              <h6 className="mb-0 fw-semibold text-dark">
+                <i className="fas fa-baby me-2 text-primary"></i>
                 Child Information
               </h6>
             </div>
-            <div className="card-body">
+            <div className="card-body p-3">
               <div className="row">
-                <div className="col-md-4">
-                  <strong>Full Name:</strong><br />
-                  {formData.child_first_name} {formData.child_middle_name} {formData.child_last_name}
+                <div className="col-md-4 mb-2">
+                  <label className="form-label fw-semibold text-dark mb-1">Full Name</label>
+                  <div className="text-dark">
+                    {formData.child_first_name} {formData.child_middle_name} {formData.child_last_name}
+                  </div>
                 </div>
-                <div className="col-md-2">
-                  <strong>Sex:</strong><br />
-                  {formData.sex || 'Not specified'}
+                <div className="col-md-2 mb-2">
+                  <label className="form-label fw-semibold text-dark mb-1">Sex</label>
+                  <div className="text-dark">{formData.sex || 'Not specified'}</div>
                 </div>
-                <div className="col-md-3">
-                  <strong>Date of Birth:</strong><br />
-                  {formatDate(formData.date_of_birth)}
+                <div className="col-md-3 mb-2">
+                  <label className="form-label fw-semibold text-dark mb-1">Date of Birth</label>
+                  <div className="text-dark">{formatDate(formData.date_of_birth)}</div>
                 </div>
-                <div className="col-md-3">
-                  <strong>Time of Birth:</strong><br />
-                  {formatTime(formData.time_of_birth)}
+                <div className="col-md-3 mb-2">
+                  <label className="form-label fw-semibold text-dark mb-1">Time of Birth</label>
+                  <div className="text-dark">{formatTime(formData.time_of_birth)}</div>
                 </div>
-                <div className="col-12 mt-2">
-                  <strong>Place of Birth:</strong><br />
-                  {formData.place_of_birth || 'Not specified'}
+                <div className="col-12 mb-2">
+                  <label className="form-label fw-semibold text-dark mb-1">Place of Birth</label>
+                  <div className="text-dark">{formData.place_of_birth || 'Not specified'}</div>
                 </div>
-                <div className="col-12 mt-2">
-                  <strong>Birth Address:</strong><br />
-                  {[formData.birth_address_house, formData.birth_address_barangay, formData.birth_address_city, formData.birth_address_province]
-                    .filter(Boolean).join(', ') || 'Not specified'}
+                <div className="col-12">
+                  <label className="form-label fw-semibold text-dark mb-1">Birth Address</label>
+                  <div className="text-dark">
+                    {[formData.birth_address_house, formData.birth_address_barangay, formData.birth_address_city, formData.birth_address_province]
+                      .filter(Boolean).join(', ') || 'Not specified'}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Parents Information Summary */}
+        {/* Parents Information */}
         <div className="col-md-6">
-          <div className="card border-0 bg-light h-100">
-            <div className="card-header bg-success bg-opacity-10">
-              <h6 className="mb-0 text-success">
-                <i className="fas fa-female me-2"></i>
+          <div className="card border-0 bg-white h-100">
+            <div 
+              className="card-header border-bottom bg-white"
+              style={{ 
+                borderColor: 'rgba(40, 167, 69, 0.2)',
+                padding: '0.75rem 1rem'
+              }}
+            >
+              <h6 className="mb-0 fw-semibold text-dark">
+                <i className="fas fa-female me-2 text-success"></i>
                 Mother's Information
               </h6>
             </div>
-            <div className="card-body">
-              <strong>Name:</strong> {formData.mother_first_name} {formData.mother_middle_name} {formData.mother_last_name}<br />
-              <strong>Citizenship:</strong> {formData.mother_citizenship || 'Not specified'}<br />
-              <strong>Age at Birth:</strong> {formData.mother_age_at_birth || 'Not specified'}<br />
-              <strong>Occupation:</strong> {formData.mother_occupation || 'Not specified'}<br />
-              <strong>Children:</strong> Born: {formData.mother_children_born_alive}, Living: {formData.mother_children_still_living}, Deceased: {formData.mother_children_deceased}
+            <div className="card-body p-3">
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Name</label>
+                <div className="text-dark">
+                  {formData.mother_first_name} {formData.mother_middle_name} {formData.mother_last_name}
+                </div>
+              </div>
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Citizenship</label>
+                <div className="text-dark">{formData.mother_citizenship || 'Not specified'}</div>
+              </div>
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Age at Birth</label>
+                <div className="text-dark">{formData.mother_age_at_birth || 'Not specified'}</div>
+              </div>
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Occupation</label>
+                <div className="text-dark">{formData.mother_occupation || 'Not specified'}</div>
+              </div>
+              <div>
+                <label className="form-label fw-semibold text-dark mb-1">Children Information</label>
+                <div className="text-dark">
+                  Born: {formData.mother_children_born_alive}, 
+                  Living: {formData.mother_children_still_living}, 
+                  Deceased: {formData.mother_children_deceased}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="col-md-6">
-          <div className="card border-0 bg-light h-100">
-            <div className="card-header bg-info bg-opacity-10">
-              <h6 className="mb-0 text-info">
-                <i className="fas fa-male me-2"></i>
+          <div className="card border-0 bg-white h-100">
+            <div 
+              className="card-header border-bottom bg-white"
+              style={{ 
+                borderColor: 'rgba(23, 162, 184, 0.2)',
+                padding: '0.75rem 1rem'
+              }}
+            >
+              <h6 className="mb-0 fw-semibold text-dark">
+                <i className="fas fa-male me-2 text-info"></i>
                 Father's Information
               </h6>
             </div>
-            <div className="card-body">
-              <strong>Name:</strong> {formData.father_first_name} {formData.father_middle_name} {formData.father_last_name}<br />
-              <strong>Citizenship:</strong> {formData.father_citizenship || 'Not specified'}<br />
-              <strong>Age at Birth:</strong> {formData.father_age_at_birth || 'Not specified'}<br />
-              <strong>Occupation:</strong> {formData.father_occupation || 'Not specified'}
+            <div className="card-body p-3">
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Name</label>
+                <div className="text-dark">
+                  {formData.father_first_name} {formData.father_middle_name} {formData.father_last_name}
+                </div>
+              </div>
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Citizenship</label>
+                <div className="text-dark">{formData.father_citizenship || 'Not specified'}</div>
+              </div>
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Age at Birth</label>
+                <div className="text-dark">{formData.father_age_at_birth || 'Not specified'}</div>
+              </div>
+              <div>
+                <label className="form-label fw-semibold text-dark mb-1">Occupation</label>
+                <div className="text-dark">{formData.father_occupation || 'Not specified'}</div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Birth Details Summary */}
+        {/* Birth Details */}
         <div className="col-12">
-          <div className="card border-0 bg-light">
-            <div className="card-header bg-warning bg-opacity-10">
-              <h6 className="mb-0 text-warning">
-                <i className="fas fa-info-circle me-2"></i>
+          <div className="card border-0 bg-white">
+            <div 
+              className="card-header border-bottom bg-white"
+              style={{ 
+                borderColor: 'rgba(255, 193, 7, 0.2)',
+                padding: '0.75rem 1rem'
+              }}
+            >
+              <h6 className="mb-0 fw-semibold text-dark">
+                <i className="fas fa-info-circle me-2 text-warning"></i>
                 Birth Details
               </h6>
             </div>
-            <div className="card-body">
+            <div className="card-body p-3">
               <div className="row">
-                <div className="col-md-3">
-                  <strong>Type of Birth:</strong><br />
-                  {formData.type_of_birth || 'Not specified'}
+                <div className="col-md-3 mb-2">
+                  <label className="form-label fw-semibold text-dark mb-1">Type of Birth</label>
+                  <div className="text-dark">{formData.type_of_birth || 'Not specified'}</div>
                 </div>
-                <div className="col-md-3">
-                  <strong>Birth Order:</strong><br />
-                  {formData.birth_order || 'Not specified'}
+                <div className="col-md-3 mb-2">
+                  <label className="form-label fw-semibold text-dark mb-1">Birth Order</label>
+                  <div className="text-dark">{formData.birth_order || 'Not specified'}</div>
                 </div>
-                <div className="col-md-3">
-                  <strong>Birth Weight:</strong><br />
-                  {formData.birth_weight ? `${formData.birth_weight} kg` : 'Not specified'}
+                <div className="col-md-3 mb-2">
+                  <label className="form-label fw-semibold text-dark mb-1">Birth Weight</label>
+                  <div className="text-dark">{formData.birth_weight ? `${formData.birth_weight} kg` : 'Not specified'}</div>
                 </div>
-                <div className="col-md-3">
-                  <strong>Multiple Birth Order:</strong><br />
-                  {formData.multiple_birth_order || 'N/A'}
+                <div className="col-md-3 mb-2">
+                  <label className="form-label fw-semibold text-dark mb-1">Multiple Birth Order</label>
+                  <div className="text-dark">{formData.multiple_birth_order || 'N/A'}</div>
                 </div>
                 {formData.birth_notes && (
                   <div className="col-12 mt-2">
-                    <strong>Additional Notes:</strong><br />
-                    {formData.birth_notes}
+                    <label className="form-label fw-semibold text-dark mb-1">Additional Notes</label>
+                    <div className="text-dark" style={{ lineHeight: "1.6" }}>{formData.birth_notes}</div>
                   </div>
                 )}
               </div>
@@ -1150,41 +1215,120 @@ export const Step8Finalize = ({ formData }) => {
           </div>
         </div>
 
-        {/* Attendant and Informant Summary */}
+        {/* Attendant and Informant */}
         <div className="col-md-6">
-          <div className="card border-0 bg-light h-100">
-            <div className="card-header bg-secondary bg-opacity-10">
-              <h6 className="mb-0 text-secondary">
-                <i className="fas fa-user-md me-2"></i>
+          <div className="card border-0 bg-white h-100">
+            <div 
+              className="card-header border-bottom bg-white"
+              style={{ 
+                borderColor: 'rgba(108, 117, 125, 0.2)',
+                padding: '0.75rem 1rem'
+              }}
+            >
+              <h6 className="mb-0 fw-semibold text-dark">
+                <i className="fas fa-user-md me-2 text-secondary"></i>
                 Birth Attendant
               </h6>
             </div>
-            <div className="card-body">
-              <strong>Name:</strong> {formData.attendant_name || 'Not specified'}<br />
-              <strong>Type:</strong> {formData.attendant_type || 'Not specified'}<br />
-              <strong>Title:</strong> {formData.attendant_title || 'Not specified'}<br />
-              <strong>License:</strong> {formData.attendant_license || 'Not specified'}
+            <div className="card-body p-3">
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Name</label>
+                <div className="text-dark">{formData.attendant_name || 'Not specified'}</div>
+              </div>
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Type</label>
+                <div className="text-dark">{formData.attendant_type || 'Not specified'}</div>
+              </div>
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Title</label>
+                <div className="text-dark">{formData.attendant_title || 'Not specified'}</div>
+              </div>
+              <div>
+                <label className="form-label fw-semibold text-dark mb-1">License</label>
+                <div className="text-dark">{formData.attendant_license || 'Not specified'}</div>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="col-md-6">
-          <div className="card border-0 bg-light h-100">
-            <div className="card-header bg-dark bg-opacity-10">
-              <h6 className="mb-0 text-dark">
-                <i className="fas fa-user me-2"></i>
+          <div className="card border-0 bg-white h-100">
+            <div 
+              className="card-header border-bottom bg-white"
+              style={{ 
+                borderColor: 'rgba(52, 58, 64, 0.2)',
+                padding: '0.75rem 1rem'
+              }}
+            >
+              <h6 className="mb-0 fw-semibold text-dark">
+                <i className="fas fa-user me-2 text-dark"></i>
                 Informant
               </h6>
             </div>
-            <div className="card-body">
-              <strong>Name:</strong> {formData.informant_first_name} {formData.informant_middle_name} {formData.informant_last_name}<br />
-              <strong>Relationship:</strong> {formData.informant_relationship || 'Not specified'}<br />
-              <strong>Certification Accepted:</strong> {formData.informant_certification_accepted ? 'Yes' : 'No'}
+            <div className="card-body p-3">
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Name</label>
+                <div className="text-dark">
+                  {formData.informant_first_name} {formData.informant_middle_name} {formData.informant_last_name}
+                </div>
+              </div>
+              <div className="mb-2">
+                <label className="form-label fw-semibold text-dark mb-1">Relationship</label>
+                <div className="text-dark">{formData.informant_relationship || 'Not specified'}</div>
+              </div>
+              <div>
+                <label className="form-label fw-semibold text-dark mb-1">Certification Accepted</label>
+                <div className="text-dark">
+                  <span className={`badge ${formData.informant_certification_accepted ? 'bg-success' : 'bg-danger'}`}>
+                    {formData.informant_certification_accepted ? 'Yes' : 'No'}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Parents Marriage Information (if available) */}
+        {(formData.marriage_date || formData.marriage_place_city) && (
+          <div className="col-12">
+            <div className="card border-0 bg-white">
+              <div 
+                className="card-header border-bottom bg-white"
+                style={{ 
+                  borderColor: 'rgba(111, 66, 193, 0.2)',
+                  padding: '0.75rem 1rem'
+                }}
+              >
+                <h6 className="mb-0 fw-semibold text-dark">
+                  <i className="fas fa-ring me-2 text-purple"></i>
+                  Parents Marriage Information
+                </h6>
+              </div>
+              <div className="card-body p-3">
+                <div className="row">
+                  {formData.marriage_date && (
+                    <div className="col-md-4 mb-2">
+                      <label className="form-label fw-semibold text-dark mb-1">Marriage Date</label>
+                      <div className="text-dark">{formatDate(formData.marriage_date)}</div>
+                    </div>
+                  )}
+                  {formData.marriage_place_city && (
+                    <div className="col-md-4 mb-2">
+                      <label className="form-label fw-semibold text-dark mb-1">Marriage Place</label>
+                      <div className="text-dark">
+                        {[formData.marriage_place_city, formData.marriage_place_province, formData.marriage_place_country]
+                          .filter(Boolean).join(', ') || 'Not specified'}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
+      {/* Confirmation Checkbox */}
       <div className="form-check mt-4">
         <input
           className="form-check-input"
@@ -1197,6 +1341,19 @@ export const Step8Finalize = ({ formData }) => {
           <span className="text-danger">*</span>
         </label>
       </div>
+
+      <style>{`
+        .text-purple {
+          color: #6f42c1 !important;
+        }
+        .card {
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          transition: box-shadow 0.3s ease;
+        }
+        .card:hover {
+          box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+      `}</style>
     </div>
   );
 };

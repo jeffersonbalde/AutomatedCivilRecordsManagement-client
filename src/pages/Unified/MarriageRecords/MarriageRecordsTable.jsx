@@ -1,8 +1,7 @@
-// src/pages/BirthRecords/components/BirthRecordsTable.jsx - FIXED VERSION
 import React, { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
 
-const BirthRecordsTable = ({
+const MarriageRecordsTable = ({
   records,
   loading,
   onViewRecord,
@@ -13,7 +12,7 @@ const BirthRecordsTable = ({
   onPageChange
 }) => {
   const { isAdmin, isStaff } = useAuth();
-  const [sortField, setSortField] = useState("date_of_birth");
+  const [sortField, setSortField] = useState("date_of_marriage");
   const [sortDirection, setSortDirection] = useState("desc");
 
   // Format date for display
@@ -34,46 +33,6 @@ const BirthRecordsTable = ({
       minute: '2-digit',
       hour12: true
     });
-  };
-
-  // Calculate age in years, months, and days
-  const calculateAge = (dateOfBirth) => {
-    if (!dateOfBirth) return { years: 0, months: 0, days: 0 };
-    
-    const birthDate = new Date(dateOfBirth);
-    const today = new Date();
-    
-    let years = today.getFullYear() - birthDate.getFullYear();
-    let months = today.getMonth() - birthDate.getMonth();
-    let days = today.getDate() - birthDate.getDate();
-
-    // Adjust for negative days
-    if (days < 0) {
-      months--;
-      // Get the last day of the previous month
-      const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
-      days += lastDayOfMonth;
-    }
-
-    // Adjust for negative months
-    if (months < 0) {
-      years--;
-      months += 12;
-    }
-
-    return { years, months, days };
-  };
-
-  // Format age display
-  const formatAge = (dateOfBirth) => {
-    const age = calculateAge(dateOfBirth);
-    if (age.years > 0) {
-      return `${age.years}y`;
-    } else if (age.months > 0) {
-      return `${age.months}m`;
-    } else {
-      return `${age.days}d`;
-    }
   };
 
   // Handle sort
@@ -106,7 +65,7 @@ const BirthRecordsTable = ({
       if (!bValue) return sortDirection === "asc" ? 1 : -1;
       
       // Handle date fields specifically
-      if (sortField === "date_of_birth") {
+      if (sortField === "date_of_marriage") {
         aValue = new Date(aValue);
         bValue = new Date(bValue);
       }
@@ -153,9 +112,6 @@ const BirthRecordsTable = ({
         <div className="skeleton-line" style={{ height: "14px", width: "60%" }}></div>
       </td>
       <td className="text-center">
-        <div className="skeleton-badge" style={{ width: "60px", height: "24px", borderRadius: "12px", margin: "0 auto" }}></div>
-      </td>
-      <td className="text-center">
         <div className="skeleton-line" style={{ height: "16px", width: "80%", margin: "0 auto" }}></div>
       </td>
       <td className="text-center">
@@ -169,8 +125,8 @@ const BirthRecordsTable = ({
       <div className="card shadow border-0">
         <div className="card-header py-3 text-white" style={{ backgroundColor: "#018181" }}>
           <h6 className="card-title mb-0">
-            <i className="fas fa-baby me-2"></i>
-            Birth Records
+            <i className="fas fa-ring me-2"></i>
+            Marriage Records
           </h6>
         </div>
         <div className="card-body p-0">
@@ -180,11 +136,10 @@ const BirthRecordsTable = ({
                 <tr>
                   <th className="text-center" style={{ width: "60px", fontSize: "0.875rem" }}>#</th>
                   <th className="text-center" style={{ width: "120px", fontSize: "0.875rem" }}>Actions</th>
-                  <th style={{ minWidth: "200px", fontSize: "0.875rem" }}>Child Information</th>
-                  <th style={{ minWidth: "150px", fontSize: "0.875rem" }}>Birth Details</th>
-                  <th className="text-center" style={{ width: "90px", fontSize: "0.875rem" }}>Sex</th>
+                  <th style={{ minWidth: "200px", fontSize: "0.875rem" }}>Couple Information</th>
+                  <th style={{ minWidth: "150px", fontSize: "0.875rem" }}>Marriage Details</th>
                   <th className="text-center" style={{ width: "120px", fontSize: "0.875rem" }}>Registry No.</th>
-                  <th className="text-center" style={{ minWidth: "130px", fontSize: "0.875rem" }}>Date of Birth</th>
+                  <th className="text-center" style={{ minWidth: "130px", fontSize: "0.875rem" }}>Date of Marriage</th>
                 </tr>
               </thead>
               <tbody>
@@ -196,7 +151,7 @@ const BirthRecordsTable = ({
           </div>
           <div className="text-center py-4">
             <div className="spinner-border me-2" style={{ color: "#018181" }} role="status"></div>
-            <span className="text-muted">Loading birth records...</span>
+            <span className="text-muted">Loading marriage records...</span>
           </div>
         </div>
       </div>
@@ -208,8 +163,8 @@ const BirthRecordsTable = ({
       <div className="card-header py-3 text-white" style={{ backgroundColor: "#018181" }}>
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
           <h6 className="card-title mb-0">
-            <i className="fas fa-baby me-2"></i>
-            Birth Records
+            <i className="fas fa-ring me-2"></i>
+            Marriage Records
             <small className="opacity-75 ms-2">
               ({sortedRecords?.data?.length || 0} of {sortedRecords?.total || 0} records)
             </small>
@@ -223,11 +178,11 @@ const BirthRecordsTable = ({
       <div className="card-body p-0">
         {!sortedRecords?.data?.length ? (
           <div className="text-center py-5">
-            <i className="fas fa-baby fa-4x text-muted opacity-50 mb-4"></i>
-            <h5 className="text-muted mb-3">No Birth Records Found</h5>
+            <i className="fas fa-ring fa-4x text-muted opacity-50 mb-4"></i>
+            <h5 className="text-muted mb-3">No Marriage Records Found</h5>
             <p className="text-muted mb-4">
               {sortedRecords?.total === 0 
-                ? "No birth records have been added yet. Click 'Add Birth Record' to create the first one."
+                ? "No marriage records have been added yet. Click 'Add Marriage Record' to create the first one."
                 : "No records match your current search criteria. Try adjusting your filters."
               }
             </p>
@@ -243,33 +198,22 @@ const BirthRecordsTable = ({
                     <th style={{ minWidth: "200px", fontSize: "0.875rem" }}>
                       <button 
                         className="btn btn-link p-0 border-0 text-decoration-none text-dark fw-semibold text-start w-100" 
-                        onClick={() => handleSort("child_first_name")}
+                        onClick={() => handleSort("husband_first_name")}
                         style={{ fontSize: "0.875rem" }}
                       >
                         <span className="d-flex align-items-center justify-content-between">
-                          Child Information <i className={`ms-1 ${getSortIcon("child_first_name")}`}></i>
+                          Couple Information <i className={`ms-1 ${getSortIcon("husband_first_name")}`}></i>
                         </span>
                       </button>
                     </th>
                     <th style={{ minWidth: "150px", fontSize: "0.875rem" }}>
                       <button 
                         className="btn btn-link p-0 border-0 text-decoration-none text-dark fw-semibold text-start w-100" 
-                        onClick={() => handleSort("type_of_birth")}
+                        onClick={() => handleSort("marriage_type")}
                         style={{ fontSize: "0.875rem" }}
                       >
                         <span className="d-flex align-items-center justify-content-between">
-                          Birth Details <i className={`ms-1 ${getSortIcon("type_of_birth")}`}></i>
-                        </span>
-                      </button>
-                    </th>
-                    <th className="text-center" style={{ width: "90px", fontSize: "0.875rem" }}>
-                      <button 
-                        className="btn btn-link p-0 border-0 text-decoration-none text-dark fw-semibold" 
-                        onClick={() => handleSort("sex")}
-                        style={{ fontSize: "0.875rem" }}
-                      >
-                        <span className="d-flex align-items-center justify-content-between">
-                          Sex <i className={`ms-1 ${getSortIcon("sex")}`}></i>
+                          Marriage Details <i className={`ms-1 ${getSortIcon("marriage_type")}`}></i>
                         </span>
                       </button>
                     </th>
@@ -287,11 +231,11 @@ const BirthRecordsTable = ({
                     <th className="text-center" style={{ minWidth: "130px", fontSize: "0.875rem" }}>
                       <button 
                         className="btn btn-link p-0 border-0 text-decoration-none text-dark fw-semibold" 
-                        onClick={() => handleSort("date_of_birth")}
+                        onClick={() => handleSort("date_of_marriage")}
                         style={{ fontSize: "0.875rem" }}
                       >
                         <span className="d-flex align-items-center justify-content-between">
-                          Date of Birth <i className={`ms-1 ${getSortIcon("date_of_birth")}`}></i>
+                          Date of Marriage <i className={`ms-1 ${getSortIcon("date_of_marriage")}`}></i>
                         </span>
                       </button>
                     </th>
@@ -300,7 +244,8 @@ const BirthRecordsTable = ({
                 <tbody>
                   {sortedRecords.data.map((record, index) => {
                     const rowNumber = (currentPage - 1) * itemsPerPage + index + 1;
-                    const fullName = `${record.child_first_name} ${record.child_middle_name ? record.child_middle_name + ' ' : ''}${record.child_last_name}`.trim();
+                    const husbandName = `${record.husband_first_name} ${record.husband_middle_name ? record.husband_middle_name + ' ' : ''}${record.husband_last_name}`.trim();
+                    const wifeName = `${record.wife_first_name} ${record.wife_middle_name ? record.wife_middle_name + ' ' : ''}${record.wife_last_name}`.trim();
                     
                     return (
                       <tr key={record.id} className="align-middle" style={{ height: "70px" }}>
@@ -382,7 +327,7 @@ const BirthRecordsTable = ({
                             {isAdmin && (
                               <button
                                 className="btn btn-sm action-btn"
-                                onClick={() => onDeleteRecord(record.id)}
+                                onClick={() => onDeleteRecord(record.id, `${husbandName} & ${wifeName}`)}
                                 title="Delete Record"
                                 style={{
                                   backgroundColor: "#dc3545",
@@ -413,7 +358,7 @@ const BirthRecordsTable = ({
                           </div>
                         </td>
 
-                        {/* Child Information - FIXED HEIGHT WITH ELLIPSIS */}
+                        {/* Couple Information */}
                         <td style={{ minWidth: "200px", maxWidth: "200px" }}>
                           <div className="d-flex align-items-center h-100">
                             <div className="flex-shrink-0">
@@ -422,57 +367,43 @@ const BirthRecordsTable = ({
                                 style={{
                                   width: "40px",
                                   height: "40px",
-                                  backgroundColor: record.sex === 'Male' ? '#018181' : '#e83e8c',
+                                  backgroundColor: "#018181",
                                   fontSize: "14px",
                                   fontWeight: 'bold'
                                 }}
                               >
-                                {record.sex === 'Male' ? 'M' : 'F'}
+                                <i className="fas fa-ring"></i>
                               </div>
                             </div>
                             <div className="flex-grow-1 ms-3 min-w-0">
-                              {/* Full Name - With ellipsis for long text */}
-                              <div className="fw-semibold text-dark text-truncate" style={{ fontSize: "0.9rem", lineHeight: "1.3" }} title={fullName}>
-                                {record.child_first_name} {record.child_middle_name} {record.child_last_name}
+                              {/* Husband Name - With ellipsis for long text */}
+                              <div className="fw-semibold text-dark text-truncate" style={{ fontSize: "0.9rem", lineHeight: "1.3" }} title={husbandName}>
+                                <i className="fas fa-male text-primary me-1"></i>
+                                {record.husband_first_name} {record.husband_last_name}
                               </div>
                               
-                              {/* Place of Birth - With ellipsis for long text */}
-                              <small className="text-info d-block text-truncate mt-1" style={{ fontSize: "0.8rem", lineHeight: "1.2" }} title={record.place_of_birth}>
-                                {record.place_of_birth}
-                              </small>
+                              {/* Wife Name - With ellipsis for long text */}
+                              <div className="text-info text-truncate mt-1" style={{ fontSize: "0.8rem", lineHeight: "1.2" }} title={wifeName}>
+                                <i className="fas fa-female text-pink me-1"></i>
+                                {record.wife_first_name} {record.wife_last_name}
+                              </div>
                             </div>
                           </div>
                         </td>
 
-                        {/* Birth Details - FIXED HEIGHT WITH ELLIPSIS */}
+                        {/* Marriage Details */}
                         <td style={{ minWidth: "150px", maxWidth: "150px" }}>
-                          <div className="fw-semibold text-dark text-truncate" style={{ fontSize: "0.9rem", lineHeight: "1.3" }} title={record.type_of_birth}>
-                            {record.type_of_birth}
+                          <div className="fw-semibold text-dark text-truncate" style={{ fontSize: "0.9rem", lineHeight: "1.3" }} title={record.marriage_type}>
+                            {record.marriage_type}
                           </div>
-                          {record.birth_weight && (
+                          <small className="text-muted d-block mt-1" style={{ fontSize: "0.8rem", lineHeight: "1.2" }}>
+                            {record.place_of_marriage}
+                          </small>
+                          {record.time_of_marriage && (
                             <small className="text-muted d-block mt-1" style={{ fontSize: "0.8rem", lineHeight: "1.2" }}>
-                              {record.birth_weight} kg
+                              {formatTime(record.time_of_marriage)}
                             </small>
                           )}
-                          {record.time_of_birth && (
-                            <small className="text-muted d-block mt-1" style={{ fontSize: "0.8rem", lineHeight: "1.2" }}>
-                              {formatTime(record.time_of_birth)}
-                            </small>
-                          )}
-                        </td>
-
-                        {/* Sex - IMPROVED CONTRAST */}
-                        <td className="text-center">
-                          <span
-                            className={`badge ${record.sex === 'Male' ? 'bg-primary' : 'bg-pink'}`}
-                            style={{ 
-                              fontSize: "0.75rem",
-                              backgroundColor: record.sex === 'Male' ? '#018181' : '#e83e8c',
-                              color: 'white'
-                            }}
-                          >
-                            {record.sex}
-                          </span>
                         </td>
 
                         {/* Registry Number */}
@@ -482,13 +413,13 @@ const BirthRecordsTable = ({
                           </span>
                         </td>
 
-                        {/* Date of Birth - RESPONSIVE FIX */}
+                        {/* Date of Marriage */}
                         <td className="text-center" style={{ minWidth: "130px", maxWidth: "130px" }}>
-                          <div className="fw-semibold text-dark text-truncate" style={{ fontSize: "0.85rem", lineHeight: "1.3" }} title={formatDate(record.date_of_birth)}>
-                            {formatDate(record.date_of_birth)}
+                          <div className="fw-semibold text-dark text-truncate" style={{ fontSize: "0.85rem", lineHeight: "1.3" }} title={formatDate(record.date_of_marriage)}>
+                            {formatDate(record.date_of_marriage)}
                           </div>
                           <small className="text-muted d-block mt-1" style={{ fontSize: "0.75rem", lineHeight: "1.2" }}>
-                            {formatAge(record.date_of_birth)}
+                            {record.formatted_time_of_marriage}
                           </small>
                         </td>
                       </tr>
@@ -635,4 +566,4 @@ const BirthRecordsTable = ({
   );
 };
 
-export default BirthRecordsTable;
+export default MarriageRecordsTable;

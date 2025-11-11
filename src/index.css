@@ -2069,12 +2069,6 @@ body.modal-open {
   box-shadow: 0 0 0 0.2rem rgba(51, 107, 49, 0.25);
 }
 
-/* Modal header gradient fix */
-.modal-header {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%) !important;
-  border-bottom: none !important;
-}
-
 /* Button styles in modals */
 .modal-footer .btn {
   border-radius: 8px;
@@ -2506,3 +2500,21 @@ body.modal-open {
   cursor: not-allowed;
 }
 
+
+
+/* GLOBAL NUCLEAR OPTION - Add this to your main CSS file */
+.modal-header {
+  background: #079B96 !important;
+  background-color: #079B96 !important;
+  background-image: none !important;
+}
+
+.modal-header[class*="birth-record"] {
+  background: #079B96 !important;
+}
+
+/* Kill the gradient completely */
+[class*="modal-header"] {
+  background: #079B96 !important;
+  background-image: none !important;
+}

@@ -1,8 +1,8 @@
-// src/pages/BirthRecords/components/BirthRecordsTable.jsx - FIXED VERSION
+// src/pages/DeathRecords/components/DeathRecordsTable.jsx
 import React, { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
 
-const BirthRecordsTable = ({
+const DeathRecordsTable = ({
   records,
   loading,
   onViewRecord,
@@ -13,7 +13,7 @@ const BirthRecordsTable = ({
   onPageChange
 }) => {
   const { isAdmin, isStaff } = useAuth();
-  const [sortField, setSortField] = useState("date_of_birth");
+  const [sortField, setSortField] = useState("date_of_death");
   const [sortDirection, setSortDirection] = useState("desc");
 
   // Format date for display
@@ -26,32 +26,22 @@ const BirthRecordsTable = ({
     });
   };
 
-  // Format time for display
-  const formatTime = (timeString) => {
-    if (!timeString) return 'N/A';
-    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
-
-  // Calculate age in years, months, and days
-  const calculateAge = (dateOfBirth) => {
-    if (!dateOfBirth) return { years: 0, months: 0, days: 0 };
+  // Calculate age at death
+  const calculateAgeAtDeath = (dateOfBirth, dateOfDeath) => {
+    if (!dateOfBirth || !dateOfDeath) return 'N/A';
     
     const birthDate = new Date(dateOfBirth);
-    const today = new Date();
+    const deathDate = new Date(dateOfDeath);
     
-    let years = today.getFullYear() - birthDate.getFullYear();
-    let months = today.getMonth() - birthDate.getMonth();
-    let days = today.getDate() - birthDate.getDate();
+    let years = deathDate.getFullYear() - birthDate.getFullYear();
+    let months = deathDate.getMonth() - birthDate.getMonth();
+    let days = deathDate.getDate() - birthDate.getDate();
 
     // Adjust for negative days
     if (days < 0) {
       months--;
       // Get the last day of the previous month
-      const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+      const lastDayOfMonth = new Date(deathDate.getFullYear(), deathDate.getMonth(), 0).getDate();
       days += lastDayOfMonth;
     }
 
@@ -61,18 +51,12 @@ const BirthRecordsTable = ({
       months += 12;
     }
 
-    return { years, months, days };
-  };
-
-  // Format age display
-  const formatAge = (dateOfBirth) => {
-    const age = calculateAge(dateOfBirth);
-    if (age.years > 0) {
-      return `${age.years}y`;
-    } else if (age.months > 0) {
-      return `${age.months}m`;
+    if (years > 0) {
+      return `${years}y`;
+    } else if (months > 0) {
+      return `${months}m`;
     } else {
-      return `${age.days}d`;
+      return `${days}d`;
     }
   };
 
@@ -91,45 +75,6 @@ const BirthRecordsTable = ({
     if (sortField !== field) return "fas fa-sort";
     return sortDirection === "asc" ? "fas fa-sort-up" : "fas fa-sort-down";
   };
-
-  // Sort records based on current sort field and direction
-  const sortRecords = (records) => {
-    if (!records || !records.data) return records;
-    
-    const sortedData = [...records.data].sort((a, b) => {
-      let aValue = a[sortField];
-      let bValue = b[sortField];
-      
-      // Handle null/undefined values
-      if (!aValue && !bValue) return 0;
-      if (!aValue) return sortDirection === "asc" ? -1 : 1;
-      if (!bValue) return sortDirection === "asc" ? 1 : -1;
-      
-      // Handle date fields specifically
-      if (sortField === "date_of_birth") {
-        aValue = new Date(aValue);
-        bValue = new Date(bValue);
-      }
-      
-      // Handle string comparison
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
-      }
-      
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-    
-    return {
-      ...records,
-      data: sortedData
-    };
-  };
-
-  // Apply sorting to the records
-  const sortedRecords = sortRecords(records);
 
   // Skeleton loader for table rows
   const TableRowSkeleton = () => (
@@ -169,8 +114,8 @@ const BirthRecordsTable = ({
       <div className="card shadow border-0">
         <div className="card-header py-3 text-white" style={{ backgroundColor: "#018181" }}>
           <h6 className="card-title mb-0">
-            <i className="fas fa-baby me-2"></i>
-            Birth Records
+            <i className="fas fa-cross me-2"></i>
+            Death Records
           </h6>
         </div>
         <div className="card-body p-0">
@@ -180,11 +125,11 @@ const BirthRecordsTable = ({
                 <tr>
                   <th className="text-center" style={{ width: "60px", fontSize: "0.875rem" }}>#</th>
                   <th className="text-center" style={{ width: "120px", fontSize: "0.875rem" }}>Actions</th>
-                  <th style={{ minWidth: "200px", fontSize: "0.875rem" }}>Child Information</th>
-                  <th style={{ minWidth: "150px", fontSize: "0.875rem" }}>Birth Details</th>
+                  <th style={{ minWidth: "200px", fontSize: "0.875rem" }}>Deceased Information</th>
+                  <th style={{ minWidth: "150px", fontSize: "0.875rem" }}>Death Details</th>
                   <th className="text-center" style={{ width: "90px", fontSize: "0.875rem" }}>Sex</th>
                   <th className="text-center" style={{ width: "120px", fontSize: "0.875rem" }}>Registry No.</th>
-                  <th className="text-center" style={{ minWidth: "130px", fontSize: "0.875rem" }}>Date of Birth</th>
+                  <th className="text-center" style={{ minWidth: "130px", fontSize: "0.875rem" }}>Date of Death</th>
                 </tr>
               </thead>
               <tbody>
@@ -196,7 +141,7 @@ const BirthRecordsTable = ({
           </div>
           <div className="text-center py-4">
             <div className="spinner-border me-2" style={{ color: "#018181" }} role="status"></div>
-            <span className="text-muted">Loading birth records...</span>
+            <span className="text-muted">Loading death records...</span>
           </div>
         </div>
       </div>
@@ -208,26 +153,26 @@ const BirthRecordsTable = ({
       <div className="card-header py-3 text-white" style={{ backgroundColor: "#018181" }}>
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
           <h6 className="card-title mb-0">
-            <i className="fas fa-baby me-2"></i>
-            Birth Records
+            <i className="fas fa-cross me-2"></i>
+            Death Records
             <small className="opacity-75 ms-2">
-              ({sortedRecords?.data?.length || 0} of {sortedRecords?.total || 0} records)
+              ({records?.data?.length || 0} of {records?.total || 0} records)
             </small>
           </h6>
           <div className="text-white small">
-            Page {sortedRecords?.current_page || 1} of {sortedRecords?.last_page || 1}
+            Page {records?.current_page || 1} of {records?.last_page || 1}
           </div>
         </div>
       </div>
 
       <div className="card-body p-0">
-        {!sortedRecords?.data?.length ? (
+        {!records?.data?.length ? (
           <div className="text-center py-5">
-            <i className="fas fa-baby fa-4x text-muted opacity-50 mb-4"></i>
-            <h5 className="text-muted mb-3">No Birth Records Found</h5>
+            <i className="fas fa-cross fa-4x text-muted opacity-50 mb-4"></i>
+            <h5 className="text-muted mb-3">No Death Records Found</h5>
             <p className="text-muted mb-4">
-              {sortedRecords?.total === 0 
-                ? "No birth records have been added yet. Click 'Add Birth Record' to create the first one."
+              {records?.total === 0 
+                ? "No death records have been added yet. Click 'Add Death Record' to create the first one."
                 : "No records match your current search criteria. Try adjusting your filters."
               }
             </p>
@@ -243,22 +188,22 @@ const BirthRecordsTable = ({
                     <th style={{ minWidth: "200px", fontSize: "0.875rem" }}>
                       <button 
                         className="btn btn-link p-0 border-0 text-decoration-none text-dark fw-semibold text-start w-100" 
-                        onClick={() => handleSort("child_first_name")}
+                        onClick={() => handleSort("first_name")}
                         style={{ fontSize: "0.875rem" }}
                       >
                         <span className="d-flex align-items-center justify-content-between">
-                          Child Information <i className={`ms-1 ${getSortIcon("child_first_name")}`}></i>
+                          Deceased Information <i className={`ms-1 ${getSortIcon("first_name")}`}></i>
                         </span>
                       </button>
                     </th>
                     <th style={{ minWidth: "150px", fontSize: "0.875rem" }}>
                       <button 
                         className="btn btn-link p-0 border-0 text-decoration-none text-dark fw-semibold text-start w-100" 
-                        onClick={() => handleSort("type_of_birth")}
+                        onClick={() => handleSort("place_of_death")}
                         style={{ fontSize: "0.875rem" }}
                       >
                         <span className="d-flex align-items-center justify-content-between">
-                          Birth Details <i className={`ms-1 ${getSortIcon("type_of_birth")}`}></i>
+                          Death Details <i className={`ms-1 ${getSortIcon("place_of_death")}`}></i>
                         </span>
                       </button>
                     </th>
@@ -287,20 +232,20 @@ const BirthRecordsTable = ({
                     <th className="text-center" style={{ minWidth: "130px", fontSize: "0.875rem" }}>
                       <button 
                         className="btn btn-link p-0 border-0 text-decoration-none text-dark fw-semibold" 
-                        onClick={() => handleSort("date_of_birth")}
+                        onClick={() => handleSort("date_of_death")}
                         style={{ fontSize: "0.875rem" }}
                       >
                         <span className="d-flex align-items-center justify-content-between">
-                          Date of Birth <i className={`ms-1 ${getSortIcon("date_of_birth")}`}></i>
+                          Date of Death <i className={`ms-1 ${getSortIcon("date_of_death")}`}></i>
                         </span>
                       </button>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedRecords.data.map((record, index) => {
+                  {records.data.map((record, index) => {
                     const rowNumber = (currentPage - 1) * itemsPerPage + index + 1;
-                    const fullName = `${record.child_first_name} ${record.child_middle_name ? record.child_middle_name + ' ' : ''}${record.child_last_name}`.trim();
+                    const fullName = `${record.first_name} ${record.middle_name ? record.middle_name + ' ' : ''}${record.last_name}`.trim();
                     
                     return (
                       <tr key={record.id} className="align-middle" style={{ height: "70px" }}>
@@ -334,7 +279,7 @@ const BirthRecordsTable = ({
                                 transition: "all 0.2s ease"
                               }}
                               onMouseEnter={(e) => {
-                                e.target.style.backgroundColor = "#016767";
+                                e.target.style.backgroundColor = "#018181";
                                 e.target.style.transform = "scale(1.05)";
                               }}
                               onMouseLeave={(e) => {
@@ -382,11 +327,11 @@ const BirthRecordsTable = ({
                             {isAdmin && (
                               <button
                                 className="btn btn-sm action-btn"
-                                onClick={() => onDeleteRecord(record.id)}
+                                onClick={() => onDeleteRecord(record.id, fullName)}
                                 title="Delete Record"
                                 style={{
-                                  backgroundColor: "#dc3545",
-                                  borderColor: "#dc3545",
+                                  backgroundColor: "#6c757d",
+                                  borderColor: "#6c757d",
                                   color: "white",
                                   width: "32px",
                                   height: "32px",
@@ -399,11 +344,11 @@ const BirthRecordsTable = ({
                                   transition: "all 0.2s ease"
                                 }}
                                 onMouseEnter={(e) => {
-                                  e.target.style.backgroundColor = "#c82333";
+                                  e.target.style.backgroundColor = "#5a6268";
                                   e.target.style.transform = "scale(1.05)";
                                 }}
                                 onMouseLeave={(e) => {
-                                  e.target.style.backgroundColor = "#dc3545";
+                                  e.target.style.backgroundColor = "#6c757d";
                                   e.target.style.transform = "scale(1)";
                                 }}
                               >
@@ -413,7 +358,7 @@ const BirthRecordsTable = ({
                           </div>
                         </td>
 
-                        {/* Child Information - FIXED HEIGHT WITH ELLIPSIS */}
+                        {/* Deceased Information - FIXED HEIGHT WITH ELLIPSIS */}
                         <td style={{ minWidth: "200px", maxWidth: "200px" }}>
                           <div className="d-flex align-items-center h-100">
                             <div className="flex-shrink-0">
@@ -422,7 +367,7 @@ const BirthRecordsTable = ({
                                 style={{
                                   width: "40px",
                                   height: "40px",
-                                  backgroundColor: record.sex === 'Male' ? '#018181' : '#e83e8c',
+                                  backgroundColor: record.sex === 'Male' ? '#007bff' : '#e83e8c',
                                   fontSize: "14px",
                                   fontWeight: 'bold'
                                 }}
@@ -433,30 +378,25 @@ const BirthRecordsTable = ({
                             <div className="flex-grow-1 ms-3 min-w-0">
                               {/* Full Name - With ellipsis for long text */}
                               <div className="fw-semibold text-dark text-truncate" style={{ fontSize: "0.9rem", lineHeight: "1.3" }} title={fullName}>
-                                {record.child_first_name} {record.child_middle_name} {record.child_last_name}
+                                {record.first_name} {record.middle_name} {record.last_name}
                               </div>
                               
-                              {/* Place of Birth - With ellipsis for long text */}
-                              <small className="text-info d-block text-truncate mt-1" style={{ fontSize: "0.8rem", lineHeight: "1.2" }} title={record.place_of_birth}>
-                                {record.place_of_birth}
+                              {/* Age at Death - With ellipsis for long text */}
+                              <small className="text-info d-block text-truncate mt-1" style={{ fontSize: "0.8rem", lineHeight: "1.2" }}>
+                                Age: {calculateAgeAtDeath(record.date_of_birth, record.date_of_death)}
                               </small>
                             </div>
                           </div>
                         </td>
 
-                        {/* Birth Details - FIXED HEIGHT WITH ELLIPSIS */}
+                        {/* Death Details - FIXED HEIGHT WITH ELLIPSIS */}
                         <td style={{ minWidth: "150px", maxWidth: "150px" }}>
-                          <div className="fw-semibold text-dark text-truncate" style={{ fontSize: "0.9rem", lineHeight: "1.3" }} title={record.type_of_birth}>
-                            {record.type_of_birth}
+                          <div className="fw-semibold text-dark text-truncate" style={{ fontSize: "0.9rem", lineHeight: "1.3" }} title={record.place_of_death}>
+                            {record.place_of_death}
                           </div>
-                          {record.birth_weight && (
+                          {record.immediate_cause && (
                             <small className="text-muted d-block mt-1" style={{ fontSize: "0.8rem", lineHeight: "1.2" }}>
-                              {record.birth_weight} kg
-                            </small>
-                          )}
-                          {record.time_of_birth && (
-                            <small className="text-muted d-block mt-1" style={{ fontSize: "0.8rem", lineHeight: "1.2" }}>
-                              {formatTime(record.time_of_birth)}
+                              {record.immediate_cause}
                             </small>
                           )}
                         </td>
@@ -467,7 +407,7 @@ const BirthRecordsTable = ({
                             className={`badge ${record.sex === 'Male' ? 'bg-primary' : 'bg-pink'}`}
                             style={{ 
                               fontSize: "0.75rem",
-                              backgroundColor: record.sex === 'Male' ? '#018181' : '#e83e8c',
+                              backgroundColor: record.sex === 'Male' ? '#007bff' : '#e83e8c',
                               color: 'white'
                             }}
                           >
@@ -477,18 +417,18 @@ const BirthRecordsTable = ({
 
                         {/* Registry Number */}
                         <td className="text-center">
-                          <span className="badge bg-primary bg-opacity-10 text-primary text-truncate" style={{ fontSize: "0.75rem", maxWidth: "100px" }} title={record.registry_number}>
+                          <span className="badge bg-danger bg-opacity-10 text-danger text-truncate" style={{ fontSize: "0.75rem", maxWidth: "100px",  color: "#018181", backgroundColor: "rgba(1, 129, 129, 0.1)" }} title={record.registry_number}>
                             {record.registry_number}
                           </span>
                         </td>
 
-                        {/* Date of Birth - RESPONSIVE FIX */}
+                        {/* Date of Death - RESPONSIVE FIX */}
                         <td className="text-center" style={{ minWidth: "130px", maxWidth: "130px" }}>
-                          <div className="fw-semibold text-dark text-truncate" style={{ fontSize: "0.85rem", lineHeight: "1.3" }} title={formatDate(record.date_of_birth)}>
-                            {formatDate(record.date_of_birth)}
+                          <div className="fw-semibold text-dark text-truncate" style={{ fontSize: "0.85rem", lineHeight: "1.3" }} title={formatDate(record.date_of_death)}>
+                            {formatDate(record.date_of_death)}
                           </div>
                           <small className="text-muted d-block mt-1" style={{ fontSize: "0.75rem", lineHeight: "1.2" }}>
-                            {formatAge(record.date_of_birth)}
+                            Born: {formatDate(record.date_of_birth)}
                           </small>
                         </td>
                       </tr>
@@ -499,36 +439,36 @@ const BirthRecordsTable = ({
             </div>
 
             {/* Pagination */}
-            {sortedRecords.last_page > 1 && (
+            {records.last_page > 1 && (
               <div className="card-footer bg-white border-top-0 py-3">
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                   <div className="text-center text-md-start">
                     <small className="text-muted">
-                      Showing <span className="fw-semibold">{sortedRecords.from}</span> to{" "}
-                      <span className="fw-semibold">{sortedRecords.to}</span> of{" "}
-                      <span className="fw-semibold">{sortedRecords.total}</span> entries
+                      Showing <span className="fw-semibold">{records.from}</span> to{" "}
+                      <span className="fw-semibold">{records.to}</span> of{" "}
+                      <span className="fw-semibold">{records.total}</span> entries
                     </small>
                   </div>
                   <div className="d-flex gap-1">
                     <button
                       className="btn btn-sm pagination-btn"
-                      onClick={() => onPageChange(sortedRecords.current_page - 1)}
-                      disabled={sortedRecords.current_page === 1}
+                      onClick={() => onPageChange(records.current_page - 1)}
+                      disabled={records.current_page === 1}
                       style={{
-                        backgroundColor: sortedRecords.current_page === 1 ? "#f8f9fa" : "white",
+                        backgroundColor: records.current_page === 1 ? "#f8f9fa" : "white",
                         borderColor: "#018181",
-                        color: sortedRecords.current_page === 1 ? "#6c757d" : "#018181",
+                        color: records.current_page === 1 ? "#6c757d" : "#018181",
                         minWidth: "80px",
                         transition: "all 0.2s ease"
                       }}
                       onMouseEnter={(e) => {
-                        if (sortedRecords.current_page !== 1) {
+                        if (records.current_page !== 1) {
                           e.target.style.backgroundColor = "#018181";
                           e.target.style.color = "white";
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (sortedRecords.current_page !== 1) {
+                        if (records.current_page !== 1) {
                           e.target.style.backgroundColor = "white";
                           e.target.style.color = "#018181";
                         }
@@ -539,11 +479,11 @@ const BirthRecordsTable = ({
                     </button>
                     
                     <div className="d-none d-md-flex gap-1">
-                      {Array.from({ length: sortedRecords.last_page }, (_, i) => i + 1)
+                      {Array.from({ length: records.last_page }, (_, i) => i + 1)
                         .filter((page) => {
-                          if (sortedRecords.last_page <= 7) return true;
-                          if (page === 1 || page === sortedRecords.last_page) return true;
-                          if (Math.abs(page - sortedRecords.current_page) <= 1) return true;
+                          if (records.last_page <= 7) return true;
+                          if (page === 1 || page === records.last_page) return true;
+                          if (Math.abs(page - records.current_page) <= 1) return true;
                           return false;
                         })
                         .map((page, index, array) => {
@@ -553,11 +493,11 @@ const BirthRecordsTable = ({
                               {showEllipsis && <span className="px-2 text-muted">...</span>}
                               <button
                                 className={`btn btn-sm pagination-page-btn ${
-                                  sortedRecords.current_page === page ? "active" : ""
+                                  records.current_page === page ? "active" : ""
                                 }`}
                                 onClick={() => onPageChange(page)}
                                 style={
-                                  sortedRecords.current_page === page
+                                  records.current_page === page
                                     ? {
                                         backgroundColor: "#018181",
                                         borderColor: "#018181",
@@ -573,12 +513,12 @@ const BirthRecordsTable = ({
                                       }
                                 }
                                 onMouseEnter={(e) => {
-                                  if (sortedRecords.current_page !== page) {
-                                    e.target.style.backgroundColor = "#e6f7f7";
+                                  if (records.current_page !== page) {
+                                    e.target.style.backgroundColor = "#ffe6e6";
                                   }
                                 }}
                                 onMouseLeave={(e) => {
-                                  if (sortedRecords.current_page !== page) {
+                                  if (records.current_page !== page) {
                                     e.target.style.backgroundColor = "white";
                                   }
                                 }}
@@ -592,30 +532,30 @@ const BirthRecordsTable = ({
                     
                     <div className="d-md-none d-flex align-items-center px-3">
                       <small className="text-muted">
-                        Page <span className="fw-bold">{sortedRecords.current_page}</span> of{" "}
-                        <span className="fw-bold">{sortedRecords.last_page}</span>
+                        Page <span className="fw-bold">{records.current_page}</span> of{" "}
+                        <span className="fw-bold">{records.last_page}</span>
                       </small>
                     </div>
                     
                     <button
                       className="btn btn-sm pagination-btn"
-                      onClick={() => onPageChange(sortedRecords.current_page + 1)}
-                      disabled={sortedRecords.current_page === sortedRecords.last_page}
+                      onClick={() => onPageChange(records.current_page + 1)}
+                      disabled={records.current_page === records.last_page}
                       style={{
-                        backgroundColor: sortedRecords.current_page === sortedRecords.last_page ? "#f8f9fa" : "white",
+                        backgroundColor: records.current_page === records.last_page ? "#f8f9fa" : "white",
                         borderColor: "#018181",
-                        color: sortedRecords.current_page === sortedRecords.last_page ? "#6c757d" : "#018181",
+                        color: records.current_page === records.last_page ? "#6c757d" : "#018181",
                         minWidth: "80px",
                         transition: "all 0.2s ease"
                       }}
                       onMouseEnter={(e) => {
-                        if (sortedRecords.current_page !== sortedRecords.last_page) {
+                        if (records.current_page !== records.last_page) {
                           e.target.style.backgroundColor = "#018181";
                           e.target.style.color = "white";
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (sortedRecords.current_page !== sortedRecords.last_page) {
+                        if (records.current_page !== records.last_page) {
                           e.target.style.backgroundColor = "white";
                           e.target.style.color = "#018181";
                         }
@@ -635,4 +575,4 @@ const BirthRecordsTable = ({
   );
 };
 
-export default BirthRecordsTable;
+export default DeathRecordsTable;   

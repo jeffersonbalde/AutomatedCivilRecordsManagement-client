@@ -12,7 +12,8 @@ import {
   Step5BirthDetails,
   Step6AttendantInfo,
   Step7InformantInfo,
-  Step8Finalize
+  Step8Finalize,
+  formatDate
 } from "./BirthRecordStepComponents";
 
 const EditBirthRecordModal = ({ record, onClose, onUpdate, token }) => {
@@ -220,9 +221,10 @@ const EditBirthRecordModal = ({ record, onClose, onUpdate, token }) => {
     }
   };
 
-  // Check for duplicates (excluding current record)
-  const checkForDuplicates = async () => {
-    if (!formData.child_first_name || !formData.child_last_name || !formData.date_of_birth) {
+const checkForDuplicates = React.useCallback(
+  async (childFirstName, childLastName, dateOfBirth) => {
+    if (!childFirstName || !childLastName || !dateOfBirth) {
+      setDuplicateAlert({ show: false, message: "", similarRecords: [] });
       return;
     }
 
@@ -237,10 +239,10 @@ const EditBirthRecordModal = ({ record, onClose, onUpdate, token }) => {
             Accept: "application/json",
           },
           body: JSON.stringify({
-            child_first_name: formData.child_first_name,
-            child_last_name: formData.child_last_name,
-            date_of_birth: formData.date_of_birth,
-            exclude_id: record.id // Exclude current record from duplicate check
+            child_first_name: childFirstName,
+            child_last_name: childLastName,
+            date_of_birth: dateOfBirth,
+            exclude_id: record.id, // This should exclude the current record
           }),
         }
       );
@@ -251,7 +253,7 @@ const EditBirthRecordModal = ({ record, onClose, onUpdate, token }) => {
         if (data.is_duplicate) {
           setDuplicateAlert({
             show: true,
-            message: `⚠️ Another record found! A birth record for "${formData.child_first_name} ${formData.child_last_name}" born on ${formatDate(formData.date_of_birth)} already exists in the system.`,
+            message: `⚠️ Another record found! A birth record for "${childFirstName} ${childLastName}" born on ${formatDate(dateOfBirth)} already exists in the system.`,
             similarRecords: data.similar_records || [],
             isExactDuplicate: true
           });
@@ -269,193 +271,12 @@ const EditBirthRecordModal = ({ record, onClose, onUpdate, token }) => {
     } catch (error) {
       console.error("Error checking duplicates:", error);
     }
-  };
+  },
+  [token, record.id]
+);
 
-  // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not specified';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
 
-  // Form validation for current step (same as AddBirthRecordModal)
-  const validateCurrentStep = () => {
-    const newErrors = {};
-    // ... same validation logic as AddBirthRecordModal
-    // Copy the validation logic from AddBirthRecordModal
-    switch (currentStep) {
-      case 1: // Child Information
-        if (!formData.child_first_name.trim()) newErrors.child_first_name = "First name is required";
-        if (!formData.child_last_name.trim()) newErrors.child_last_name = "Last name is required";
-        if (!formData.sex) newErrors.sex = "Sex is required";
-        if (!formData.date_of_birth) newErrors.date_of_birth = "Date of birth is required";
-        if (!formData.place_of_birth.trim()) newErrors.place_of_birth = "Place of birth is required";
-        if (!formData.birth_address_city.trim()) newErrors.birth_address_city = "City is required";
-        if (!formData.type_of_birth) newErrors.type_of_birth = "Type of birth is required";
-        if (!formData.birth_order || formData.birth_order < 1) newErrors.birth_order = "Valid birth order is required";
-        break;
-
-      case 2: // Mother Information
-        if (!formData.mother_first_name.trim()) newErrors.mother_first_name = "First name is required";
-        if (!formData.mother_last_name.trim()) newErrors.mother_last_name = "Last name is required";
-        if (!formData.mother_citizenship.trim()) newErrors.mother_citizenship = "Citizenship is required";
-        if (!formData.mother_age_at_birth || formData.mother_age_at_birth < 15) newErrors.mother_age_at_birth = "Valid age is required";
-        if (!formData.mother_barangay.trim()) newErrors.mother_barangay = "Barangay is required";
-        if (!formData.mother_city.trim()) newErrors.mother_city = "City is required";
-        break;
-
-      case 3: // Father Information
-        if (!formData.father_first_name.trim()) newErrors.father_first_name = "First name is required";
-        if (!formData.father_last_name.trim()) newErrors.father_last_name = "Last name is required";
-        if (!formData.father_citizenship.trim()) newErrors.father_citizenship = "Citizenship is required";
-        if (!formData.father_age_at_birth || formData.father_age_at_birth < 15) newErrors.father_age_at_birth = "Valid age is required";
-        if (!formData.father_barangay.trim()) newErrors.father_barangay = "Barangay is required";
-        if (!formData.father_city.trim()) newErrors.father_city = "City is required";
-        break;
-
-      case 6: // Attendant Information
-        if (!formData.attendant_type) newErrors.attendant_type = "Attendant type is required";
-        if (!formData.attendant_name.trim()) newErrors.attendant_name = "Attendant name is required";
-        if (!formData.attendant_certification.trim()) newErrors.attendant_certification = "Certification is required";
-        if (!formData.attendant_address.trim()) newErrors.attendant_address = "Address is required";
-        if (!formData.attendant_title.trim()) newErrors.attendant_title = "Title is required";
-        break;
-
-      case 7: // Informant Information
-        if (!formData.informant_first_name.trim()) newErrors.informant_first_name = "First name is required";
-        if (!formData.informant_last_name.trim()) newErrors.informant_last_name = "Last name is required";
-        if (!formData.informant_relationship.trim()) newErrors.informant_relationship = "Relationship is required";
-        if (!formData.informant_address.trim()) newErrors.informant_address = "Address is required";
-        if (!formData.informant_certification_accepted) newErrors.informant_certification_accepted = "Certification must be accepted";
-        break;
-
-      case 8: // Finalize
-        // No validation needed for final step, just confirmation
-        break;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Navigation functions
-  const nextStep = () => {
-    if (validateCurrentStep()) {
-      // Mark current step as completed
-      const updatedSteps = steps.map(step =>
-        step.number === currentStep ? { ...step, completed: true } : step
-      );
-      
-      setCurrentStep(prev => Math.min(prev + 1, steps.length));
-    }
-  };
-
-  const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
-
-  // Handle form submission for update
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateCurrentStep()) {
-      showAlert.error("Validation Error", "Please fix all errors before updating.");
-      return;
-    }
-
-    if (duplicateAlert.isExactDuplicate) {
-      showAlert.error(
-        "Duplicate Record",
-        "Cannot update record. Another record with the same child name and date of birth already exists."
-      );
-      return;
-    }
-
-    const confirmation = await showAlert.confirm(
-      "Confirm Update",
-      "Are you sure you want to update this birth record?",
-      "Yes, Update Record",
-      "Review Changes"
-    );
-
-    if (!confirmation.isConfirmed) return;
-
-    setLoading(true);
-
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_LARAVEL_API}/birth-records/${record.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showToast.success("Birth record updated successfully!");
-        setHasUnsavedChanges(false);
-        onUpdate(data.data);
-      } else {
-        if (data.errors) {
-          setErrors(data.errors);
-          throw new Error("Please fix the form errors");
-        }
-        throw new Error(data.message || "Failed to update birth record");
-      }
-    } catch (error) {
-      console.error("Error updating birth record:", error);
-      showAlert.error("Error", error.message || "Failed to update birth record");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle modal close
-  const handleClose = async () => {
-    if (hasUnsavedChanges) {
-      const result = await showAlert.confirm(
-        "Unsaved Changes",
-        "You have unsaved changes. Are you sure you want to close without saving?",
-        "Yes, Close",
-        "Continue Editing"
-      );
-
-      if (!result.isConfirmed) return;
-    }
-
-    onClose();
-  };
-
-  // Effect for escape key and body scroll
-  useEffect(() => {
-    const handleEscapeKey = (e) => {
-      if (e.key === "Escape" && !loading) {
-        handleClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscapeKey);
-    document.body.classList.add("modal-open");
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", handleEscapeKey);
-      document.body.classList.remove("modal-open");
-      document.body.style.overflow = "auto";
-    };
-  }, [loading, hasUnsavedChanges]);
-
-  // Duplicate Alert Component
+  // Enhanced duplicate alert component
   const DuplicateAlert = () => {
     if (!duplicateAlert.show) return null;
 
@@ -499,10 +320,245 @@ const EditBirthRecordModal = ({ record, onClose, onUpdate, token }) => {
               </div>
             )}
           </div>
+          <div className="flex-shrink-0 ms-3">
+            {duplicateAlert.isExactDuplicate && (
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-danger"
+                onClick={() => {
+                  // Clear the conflicting fields
+                  setFormData(prev => ({
+                    ...prev,
+                    child_first_name: '',
+                    child_last_name: '',
+                    date_of_birth: ''
+                  }));
+                  setDuplicateAlert({ show: false, message: "", similarRecords: [] });
+                }}
+              >
+                <i className="fas fa-times me-1"></i>
+                Clear Fields
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
   };
+
+  // Enhanced validation to prevent duplicate submission
+  const validateBeforeSubmit = () => {
+    if (duplicateAlert.isExactDuplicate) {
+      showAlert.error(
+        "Duplicate Record",
+        "Cannot update record. Another record with the same child name and date of birth already exists."
+      );
+      return false;
+    }
+    return validateCurrentStep();
+  };
+
+  // Enhanced form validation with detailed error messages
+  const validateCurrentStep = () => {
+    const newErrors = {};
+
+    switch (currentStep) {
+      case 1: // Child Information
+        if (!formData.child_first_name.trim()) newErrors.child_first_name = "First name is required";
+        if (!formData.child_last_name.trim()) newErrors.child_last_name = "Last name is required";
+        if (!formData.sex) newErrors.sex = "Sex is required";
+        if (!formData.date_of_birth) newErrors.date_of_birth = "Date of birth is required";
+        if (!formData.place_of_birth.trim()) newErrors.place_of_birth = "Place of birth is required";
+        if (!formData.birth_address_city.trim()) newErrors.birth_address_city = "City is required";
+        if (!formData.type_of_birth) newErrors.type_of_birth = "Type of birth is required";
+        if (!formData.birth_order || formData.birth_order < 1) newErrors.birth_order = "Valid birth order is required";
+        break;
+
+      case 2: // Mother Information
+        if (!formData.mother_first_name.trim()) newErrors.mother_first_name = "First name is required";
+        if (!formData.mother_last_name.trim()) newErrors.mother_last_name = "Last name is required";
+        if (!formData.mother_citizenship.trim()) newErrors.mother_citizenship = "Citizenship is required";
+        if (!formData.mother_age_at_birth || formData.mother_age_at_birth < 15) newErrors.mother_age_at_birth = "Valid age is required (minimum 15)";
+        if (!formData.mother_barangay.trim()) newErrors.mother_barangay = "Barangay is required";
+        if (!formData.mother_city.trim()) newErrors.mother_city = "City is required";
+        break;
+
+      case 3: // Father Information
+        if (!formData.father_first_name.trim()) newErrors.father_first_name = "First name is required";
+        if (!formData.father_last_name.trim()) newErrors.father_last_name = "Last name is required";
+        if (!formData.father_citizenship.trim()) newErrors.father_citizenship = "Citizenship is required";
+        if (!formData.father_age_at_birth || formData.father_age_at_birth < 15) newErrors.father_age_at_birth = "Valid age is required (minimum 15)";
+        if (!formData.father_barangay.trim()) newErrors.father_barangay = "Barangay is required";
+        if (!formData.father_city.trim()) newErrors.father_city = "City is required";
+        break;
+
+      case 6: // Attendant Information
+        if (!formData.attendant_type) newErrors.attendant_type = "Attendant type is required";
+        if (!formData.attendant_name.trim()) newErrors.attendant_name = "Attendant name is required";
+        if (!formData.attendant_certification.trim()) newErrors.attendant_certification = "Certification is required";
+        if (!formData.attendant_address.trim()) newErrors.attendant_address = "Address is required";
+        if (!formData.attendant_title.trim()) newErrors.attendant_title = "Title is required";
+        break;
+
+      case 7: // Informant Information
+        if (!formData.informant_first_name.trim()) newErrors.informant_first_name = "First name is required";
+        if (!formData.informant_last_name.trim()) newErrors.informant_last_name = "Last name is required";
+        if (!formData.informant_relationship.trim()) newErrors.informant_relationship = "Relationship is required";
+        if (!formData.informant_address.trim()) newErrors.informant_address = "Address is required";
+        if (!formData.informant_certification_accepted) newErrors.informant_certification_accepted = "Certification must be accepted";
+        break;
+
+      case 8: // Finalize
+        // No validation needed for final step, just confirmation
+        break;
+    }
+
+    setErrors(newErrors);
+    
+    // Show detailed error alert if there are errors
+    if (Object.keys(newErrors).length > 0) {
+      const errorMessages = Object.values(newErrors).filter(msg => msg);
+      if (errorMessages.length > 0) {
+        showAlert.error(
+          "Form Validation Error",
+          `Please fix the following errors:\n\n• ${errorMessages.join('\n• ')}`
+        );
+      }
+    }
+    
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Navigation functions
+  const nextStep = () => {
+    if (validateCurrentStep()) {
+      // Mark current step as completed
+      const updatedSteps = steps.map(step =>
+        step.number === currentStep ? { ...step, completed: true } : step
+      );
+      
+      setCurrentStep(prev => Math.min(prev + 1, steps.length));
+    }
+  };
+
+  const prevStep = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!validateBeforeSubmit()) {
+    return;
+  }
+
+  if (!validateCurrentStep()) {
+    return;
+  }
+
+  const confirmation = await showAlert.confirm(
+    "Confirm Update",
+    "Are you sure you want to update this birth record?",
+    "Yes, Update Record",
+    "Review Changes"
+  );
+
+  if (!confirmation.isConfirmed) return;
+
+  // Show processing alert
+  showAlert.processing("Updating Record", "Please wait while we update the birth record...");
+  setLoading(true);
+
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_LARAVEL_API}/birth-records/${record.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify(formData),
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Close the processing alert
+      showAlert.close();
+      
+      showToast.success("Birth record updated successfully!");
+      
+      
+      setHasUnsavedChanges(false);
+      
+      // Wait before closing modal to see toast
+      setTimeout(() => {
+        onUpdate(data.data);
+      }, 2000);
+      
+    } else {
+      // Close the processing alert
+      showAlert.close();
+      
+      if (data.errors) {
+        const backendErrors = Object.values(data.errors).flat();
+        showAlert.error(
+          "Update Error", 
+          `Please fix the following errors:\n\n• ${backendErrors.join('\n• ')}`
+        );
+        setErrors(data.errors);
+      } else {
+        throw new Error(data.message || "Failed to update birth record");
+      }
+    }
+  } catch (error) {
+    // Close the processing alert
+    showAlert.close();
+    
+    console.error("Error updating birth record:", error);
+    showAlert.error("Error", error.message || "Failed to update birth record");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // Handle modal close
+  const handleClose = async () => {
+    if (hasUnsavedChanges) {
+      const result = await showAlert.confirm(
+        "Unsaved Changes",
+        "You have unsaved changes. Are you sure you want to close without saving?",
+        "Yes, Close",
+        "Continue Editing"
+      );
+
+      if (!result.isConfirmed) return;
+    }
+
+    onClose();
+  };
+
+  // Effect for escape key and body scroll
+  useEffect(() => {
+    const handleEscapeKey = (e) => {
+      if (e.key === "Escape" && !loading) {
+        handleClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscapeKey);
+    document.body.classList.add("modal-open");
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+      document.body.classList.remove("modal-open");
+      document.body.style.overflow = "auto";
+    };
+  }, [loading, hasUnsavedChanges]);
 
   // Render step content (using same components as AddBirthRecordModal)
   const renderStepContent = () => {
@@ -546,8 +602,8 @@ const EditBirthRecordModal = ({ record, onClose, onUpdate, token }) => {
           >
             {/* Header */}
             <div
+              id="birth-record-modal-header"
               className="modal-header border-0 text-white"
-              style={{ backgroundColor: "#018181" }}
             >
               <h5 className="modal-title fw-bold">
                 <i className="fas fa-edit me-2"></i>
@@ -575,19 +631,24 @@ const EditBirthRecordModal = ({ record, onClose, onUpdate, token }) => {
                 {/* Duplicate Alert */}
                 <DuplicateAlert />
 
-                {/* Stepper */}
-                <div className="stepper mb-4">
-                  {steps.map((step) => (
-                    <div
-                      key={step.number}
-                      className={`step ${currentStep === step.number ? "active" : ""} ${
-                        step.completed ? "completed" : ""
-                      }`}
-                      data-step={step.number}
-                    >
-                      <span>{step.title}</span>
-                    </div>
-                  ))}
+                {/* Responsive Stepper */}
+                <div className="stepper-container mb-4">
+                  <div className="stepper-responsive">
+                    {steps.map((step) => (
+                      <div
+                        key={step.number}
+                        className={`step-responsive ${currentStep === step.number ? "active" : ""} ${
+                          step.completed ? "completed" : ""
+                        }`}
+                        data-step={step.number}
+                      >
+                        <div className="step-circle">
+                          <span>{step.number}</span>
+                        </div>
+                        <div className="step-title">{step.title}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Step Content */}
@@ -608,20 +669,16 @@ const EditBirthRecordModal = ({ record, onClose, onUpdate, token }) => {
                 {currentStep < steps.length ? (
                   <button
                     type="button"
-                    className="btn btn-primary"
+                    className="btn btn-primary next-button"
                     onClick={nextStep}
                     disabled={loading}
-                    style={{
-                      backgroundColor: "#018181",
-                      borderColor: "#018181",
-                    }}
                   >
                     Next <i className="fas fa-arrow-right ms-2"></i>
                   </button>
                 ) : (
                   <button
                     type="submit"
-                    className="btn btn-warning"
+                    className="btn btn-warning save-button"
                     disabled={loading}
                   >
                     {loading ? (
@@ -645,71 +702,181 @@ const EditBirthRecordModal = ({ record, onClose, onUpdate, token }) => {
 
       {/* Same styles as AddBirthRecordModal */}
       <style>{`
-        .stepper {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 30px;
-          position: relative;
+        #birth-record-modal-header {
+          background-color: #018181 !important;
+          background-image: none !important;
         }
 
-        .stepper::before {
+        /* Responsive Stepper Styles */
+        .stepper-container {
+          overflow-x: auto;
+          padding-bottom: 10px;
+        }
+
+        .stepper-responsive {
+          display: flex;
+          justify-content: space-between;
+          min-width: 600px;
+          position: relative;
+          padding: 0 20px;
+        }
+
+        .stepper-responsive::before {
           content: '';
           position: absolute;
           top: 20px;
-          left: 0;
-          right: 0;
+          left: 50px;
+          right: 50px;
           height: 2px;
           background: #dee2e6;
           z-index: 1;
         }
 
-        .step {
+        .step-responsive {
           position: relative;
           z-index: 2;
           text-align: center;
           flex: 1;
+          min-width: 80px;
         }
 
-        .step::before {
-          content: attr(data-step);
+        .step-circle {
           width: 40px;
           height: 40px;
           background: white;
           border: 2px solid #dee2e6;
           border-radius: 50%;
-          display: block;
-          margin: 0 auto 10px;
-          line-height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 8px;
           font-weight: bold;
           transition: all 0.3s;
         }
 
-        .step.active::before {
+        .step-responsive.active .step-circle {
           background: #018181;
           border-color: #018181;
           color: white;
         }
 
-        .step.completed::before {
-          background: #28a745;
-          border-color: #28a745;
+        .step-responsive.completed .step-circle {
+          background: #018181;
+          border-color: #018181;
           color: white;
         }
 
-        .step span {
-          font-size: 0.8rem;
+        .step-title {
+          font-size: 0.75rem;
           color: #6c757d;
           transition: all 0.3s;
+          font-weight: 500;
         }
 
-        .step.active span {
+        .step-responsive.active .step-title {
           color: #018181;
           font-weight: 600;
         }
 
-        .step.completed span {
-          color: #28a745;
+        .step-responsive.completed .step-title {
+          color: #018181;
           font-weight: 600;
+        }
+
+        /* Button Styles */
+        .next-button, .save-button {
+          background-color: #018181 !important;
+          border-color: #018181 !important;
+          color: white !important;
+          transition: all 0.3s ease;
+        }
+
+        .next-button:hover, .save-button:hover {
+          background-color: #016767 !important;
+          border-color: #016767 !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(1, 129, 129, 0.3);
+        }
+
+        .next-button:active, .save-button:active {
+          background-color: #015555 !important;
+          border-color: #015555 !important;
+          transform: translateY(0);
+        }
+
+        .next-button:disabled, .save-button:disabled {
+          background-color: #6c757d !important;
+          border-color: #6c757d !important;
+          transform: none;
+          box-shadow: none;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+          .modal-xl {
+            max-width: 95%;
+            margin: 10px auto;
+          }
+          
+          .stepper-responsive {
+            min-width: 500px;
+            padding: 0 10px;
+          }
+          
+          .step-responsive {
+            min-width: 60px;
+          }
+          
+          .step-circle {
+            width: 35px;
+            height: 35px;
+            font-size: 0.9rem;
+          }
+          
+          .step-title {
+            font-size: 0.7rem;
+          }
+          
+          .stepper-responsive::before {
+            left: 30px;
+            right: 30px;
+            top: 17px;
+          }
+        }
+
+        @media (max-width: 576px) {
+          .modal-xl {
+            max-width: 100%;
+            margin: 0;
+          }
+          
+          .stepper-responsive {
+            min-width: 400px;
+          }
+          
+          .step-responsive {
+            min-width: 50px;
+          }
+          
+          .step-circle {
+            width: 30px;
+            height: 30px;
+            font-size: 0.8rem;
+          }
+          
+          .step-title {
+            font-size: 0.65rem;
+          }
+          
+          .stepper-responsive::before {
+            left: 25px;
+            right: 25px;
+            top: 15px;
+          }
+          
+          .modal-body {
+            padding: 15px;
+          }
         }
 
         .form-step {
@@ -730,6 +897,25 @@ const EditBirthRecordModal = ({ record, onClose, onUpdate, token }) => {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+
+        /* Custom scrollbar for stepper */
+        .stepper-container::-webkit-scrollbar {
+          height: 6px;
+        }
+
+        .stepper-container::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 3px;
+        }
+
+        .stepper-container::-webkit-scrollbar-thumb {
+          background: #c1c1c1;
+          border-radius: 3px;
+        }
+
+        .stepper-container::-webkit-scrollbar-thumb:hover {
+          background: #a8a8a8;
         }
       `}</style>
     </Portal>

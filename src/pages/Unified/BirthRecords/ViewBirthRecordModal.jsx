@@ -5,38 +5,81 @@ import Portal from "../../../components/Portal";
 const ViewBirthRecordModal = ({ record, onClose }) => {
   if (!record) return null;
 
-  // Format date for display
+  // Get encoder display information
+  const getEncoderInfo = () => {
+    if (record.encoded_by && typeof record.encoded_by === "object") {
+      return record.encoded_by;
+    }
+
+    return {
+      full_name: record.encoder_name || "System",
+      user_type: record.encoder_type || "System",
+      position: "System Account",
+      email: null,
+    };
+  };
+
+  const encoderInfo = getEncoderInfo();
+
+  // Format display text
+  const getDisplayType = (type) => {
+    switch (type) {
+      case "Admin":
+        return "Administrator";
+      case "Staff":
+        return "Staff";
+      case "System":
+        return "System";
+      default:
+        return "User";
+    }
+  };
+
+  const getDisplayDetails = (type, details) => {
+    switch (type) {
+      case "Admin":
+        return details || "System Administrator";
+      case "Staff":
+        return "Registry Staff";
+      case "System":
+        return "System Account";
+      default:
+        return details || "Registry User";
+    }
+  };
+
   const formatDate = (dateString) => {
-    if (!dateString) return 'Not specified';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    if (!dateString) return "Not specified";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
-  // Format time for display
   const formatTime = (timeString) => {
-    if (!timeString) return 'Not specified';
-    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
+    if (!timeString) return "Not specified";
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
-  // Calculate age
   const calculateAge = (birthDate) => {
-    if (!birthDate) return 'N/A';
+    if (!birthDate) return "N/A";
     const today = new Date();
     const birth = new Date(birthDate);
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
       age--;
     }
-    
+
     return age;
   };
 
@@ -72,19 +115,31 @@ const ViewBirthRecordModal = ({ record, onClose }) => {
         onClick={handleBackdropClick}
         tabIndex="-1"
       >
-        <div className="modal-dialog modal-dialog-centered modal-xl">
+        <div className="modal-dialog modal-dialog-centered modal-lg mx-3 mx-sm-auto">
           <div
             className="modal-content border-0"
             style={{
               boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
             }}
           >
-            {/* Header */}
+            {/* Header - Using custom class to override .modal-header */}
             <div
-              className="modal-header border-0 text-white"
-              style={{ backgroundColor: "#018181" }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "1rem 1.5rem",
+                backgroundColor: "#079B96",
+                color: "white",
+                borderBottom: "none",
+                borderTopLeftRadius: "0.5rem",
+                borderTopRightRadius: "0.5rem",
+              }}
             >
-              <h5 className="modal-title fw-bold">
+              <h5
+                className="modal-title fw-bold"
+                style={{ margin: 0, color: "white" }}
+              >
                 <i className="fas fa-eye me-2"></i>
                 Birth Record Details
               </h5>
@@ -93,198 +148,284 @@ const ViewBirthRecordModal = ({ record, onClose }) => {
                 className="btn-close btn-close-white"
                 onClick={onClose}
                 aria-label="Close"
+                style={{
+                  filter: "invert(1)",
+                }}
               ></button>
             </div>
 
-            {/* Modal Body */}
             <div
-              className="modal-body"
+              className="modal-body bg-light"
               style={{
-                maxHeight: "80vh",
+                maxHeight: "70vh",
                 overflowY: "auto",
-                backgroundColor: "#f8f9fa",
               }}
             >
-              {/* Registry Number Banner */}
-              <div className="row mb-4">
+              <div className="row g-3">
+                {/* Record Header */}
                 <div className="col-12">
-                  <div className="card bg-primary bg-opacity-10 border-primary">
-                    <div className="card-body text-center py-3">
-                      <h4 className="mb-0 text-primary">
-                        <i className="fas fa-certificate me-2"></i>
-                        Registry Number: <strong>{record.registry_number}</strong>
-                      </h4>
-                      <small className="text-muted">
-                        Registered on {formatDate(record.date_registered)}
-                      </small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="row g-4">
-                {/* Child Information */}
-                <div className="col-12">
-                  <div className="card border-0 shadow-sm">
-                    <div className="card-header bg-primary text-white">
-                      <h6 className="mb-0">
-                        <i className="fas fa-baby me-2"></i>
-                        Child Information
-                      </h6>
-                    </div>
-                    <div className="card-body">
-                      <div className="row">
-                        <div className="col-md-4 mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Full Name</label>
-                          <div className="fw-semibold text-dark fs-6">
-                            {record.child_first_name} {record.child_middle_name} {record.child_last_name}
+                  <div className="card border-0 bg-white">
+                    <div className="card-body p-3">
+                      <div className="d-flex align-items-center">
+                        <div className="me-3">
+                          <div
+                            className="rounded-circle d-flex align-items-center justify-content-center"
+                            style={{
+                              width: "50px",
+                              height: "50px",
+                              backgroundColor: "#079B96",
+                            }}
+                          >
+                            <i className="fas fa-baby text-white"></i>
                           </div>
                         </div>
-                        <div className="col-md-2 mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Sex</label>
-                          <div>
-                            <span className={`badge ${record.sex === 'Male' ? 'bg-info' : 'bg-pink'}`}>
+                        <div className="flex-grow-1">
+                          <h4 className="mb-2 text-dark fw-bold">
+                            {record.child_first_name} {record.child_middle_name}{" "}
+                            {record.child_last_name}
+                          </h4>
+                          <div className="d-flex flex-wrap gap-2">
+                            <span
+                              className={`badge ${
+                                record.sex === "Male" ? "bg-info" : "bg-pink"
+                              } text-white`}
+                            >
                               {record.sex}
+                            </span>
+                            <span className="badge bg-primary text-white">
+                              {record.type_of_birth}
+                            </span>
+                            <span className="badge bg-light text-dark border">
+                              <i className="fas fa-certificate me-1"></i>
+                              {record.registry_number}
+                            </span>
+                            <span className="badge bg-success text-white">
+                              Born: {formatDate(record.date_of_birth)}
                             </span>
                           </div>
                         </div>
-                        <div className="col-md-3 mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Date of Birth</label>
-                          <div className="fw-semibold text-dark">
-                            {formatDate(record.date_of_birth)}
-                          </div>
-                        </div>
-                        <div className="col-md-3 mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Age</label>
-                          <div className="fw-semibold text-dark">
-                            {calculateAge(record.date_of_birth)} years old
-                          </div>
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Place of Birth</label>
-                          <div className="fw-semibold text-dark">
-                            {record.place_of_birth}
-                          </div>
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Time of Birth</label>
-                          <div className="fw-semibold text-dark">
-                            {formatTime(record.time_of_birth)}
-                          </div>
-                        </div>
-                        <div className="col-12 mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Birth Address</label>
-                          <div className="fw-semibold text-dark">
-                            {[record.birth_address_house, record.birth_address_barangay, record.birth_address_city, record.birth_address_province]
-                              .filter(Boolean).join(', ') || 'Not specified'}
-                          </div>
-                        </div>
-                        <div className="col-md-4 mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Type of Birth</label>
-                          <div className="fw-semibold text-dark">
-                            {record.type_of_birth}
-                          </div>
-                        </div>
-                        <div className="col-md-4 mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Birth Order</label>
-                          <div className="fw-semibold text-dark">
-                            {record.birth_order}
-                          </div>
-                        </div>
-                        <div className="col-md-4 mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Birth Weight</label>
-                          <div className="fw-semibold text-dark">
-                            {record.birth_weight ? `${record.birth_weight} kg` : 'Not specified'}
-                          </div>
-                        </div>
-                        {record.multiple_birth_order && (
-                          <div className="col-12 mb-3">
-                            <label className="form-label small fw-semibold text-muted mb-1">Multiple Birth Order</label>
-                            <div className="fw-semibold text-dark">
-                              {record.multiple_birth_order}
-                            </div>
-                          </div>
-                        )}
-                        {record.birth_notes && (
-                          <div className="col-12">
-                            <label className="form-label small fw-semibold text-muted mb-1">Additional Notes</label>
-                            <div className="text-dark" style={{ whiteSpace: 'pre-wrap' }}>
-                              {record.birth_notes}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Parents Information */}
-                <div className="col-md-6">
-                  <div className="card border-0 shadow-sm h-100">
-                    <div className="card-header bg-success text-white">
-                      <h6 className="mb-0">
-                        <i className="fas fa-female me-2"></i>
+                {/* Child Information */}
+                <div className="col-12 col-md-6">
+                  <div
+                    className="card border-0 bg-white"
+                    style={{ height: "100%" }}
+                  >
+                    <div
+                      className="card-header border-bottom bg-white"
+                      style={{
+                        borderColor: "rgba(7, 155, 150, 0.2)",
+                        padding: "0.75rem 1rem",
+                      }}
+                    >
+                      <h6 className="mb-0 fw-semibold text-dark">
+                        <i className="fas fa-baby me-2 text-primary"></i>
+                        Child Information
+                      </h6>
+                    </div>
+                    <div className="card-body" style={{ padding: "1rem" }}>
+                      <div style={{ marginBottom: "1rem" }}>
+                        <label className="form-label fw-semibold text-dark mb-1">
+                          <i className="fas fa-user me-1 text-info"></i>
+                          Full Name
+                        </label>
+                        <div className="text-dark">
+                          {record.child_first_name} {record.child_middle_name}{" "}
+                          {record.child_last_name}
+                        </div>
+                      </div>
+                      <div style={{ marginBottom: "1rem" }}>
+                        <label className="form-label fw-semibold text-dark mb-1">
+                          <i className="fas fa-venus-mars me-1 text-primary"></i>
+                          Sex & Age
+                        </label>
+                        <div className="text-dark">
+                          {record.sex} • {calculateAge(record.date_of_birth)}{" "}
+                          years old
+                        </div>
+                      </div>
+                      <div style={{ marginBottom: "1rem" }}>
+                        <label className="form-label fw-semibold text-dark mb-1">
+                          <i className="fas fa-calendar-alt me-1 text-success"></i>
+                          Date of Birth
+                        </label>
+                        <div className="text-dark">
+                          {formatDate(record.date_of_birth)}
+                        </div>
+                      </div>
+                      <div style={{ marginBottom: "1rem" }}>
+                        <label className="form-label fw-semibold text-dark mb-1">
+                          <i className="fas fa-clock me-1 text-secondary"></i>
+                          Time of Birth
+                        </label>
+                        <div className="text-dark">
+                          {formatTime(record.time_of_birth)}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="form-label fw-semibold text-dark mb-1">
+                          <i className="fas fa-map-marker-alt me-1 text-danger"></i>
+                          Place of Birth
+                        </label>
+                        <div className="text-dark">{record.place_of_birth}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Birth Details */}
+                <div className="col-12 col-md-6">
+                  <div
+                    className="card border-0 bg-white"
+                    style={{ height: "100%" }}
+                  >
+                    <div
+                      className="card-header border-bottom bg-white"
+                      style={{
+                        borderColor: "rgba(7, 155, 150, 0.2)",
+                        padding: "0.75rem 1rem",
+                      }}
+                    >
+                      <h6 className="mb-0 fw-semibold text-dark">
+                        <i className="fas fa-info-circle me-2 text-warning"></i>
+                        Birth Details
+                      </h6>
+                    </div>
+                    <div className="card-body" style={{ padding: "1rem" }}>
+                      <div style={{ marginBottom: "1rem" }}>
+                        <label className="form-label fw-semibold text-dark mb-1">
+                          Type of Birth
+                        </label>
+                        <div className="text-dark">{record.type_of_birth}</div>
+                      </div>
+                      <div style={{ marginBottom: "1rem" }}>
+                        <label className="form-label fw-semibold text-dark mb-1">
+                          Birth Order
+                        </label>
+                        <div className="text-dark">{record.birth_order}</div>
+                      </div>
+                      <div style={{ marginBottom: "1rem" }}>
+                        <label className="form-label fw-semibold text-dark mb-1">
+                          Birth Weight
+                        </label>
+                        <div className="text-dark">
+                          {record.birth_weight
+                            ? `${record.birth_weight} kg`
+                            : "Not specified"}
+                        </div>
+                      </div>
+                      {record.multiple_birth_order && (
+                        <div style={{ marginBottom: "1rem" }}>
+                          <label className="form-label fw-semibold text-dark mb-1">
+                            Multiple Birth Order
+                          </label>
+                          <div className="text-dark">
+                            {record.multiple_birth_order}
+                          </div>
+                        </div>
+                      )}
+                      <div>
+                        <label className="form-label fw-semibold text-dark mb-1">
+                          Birth Address
+                        </label>
+                        <div className="text-dark small">
+                          {[
+                            record.birth_address_house,
+                            record.birth_address_barangay,
+                            record.birth_address_city,
+                            record.birth_address_province,
+                          ]
+                            .filter(Boolean)
+                            .join(", ") || "Not specified"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mother's Information */}
+                <div className="col-12 col-md-6">
+                  <div
+                    className="card border-0 bg-white"
+                    style={{ height: "100%" }}
+                  >
+                    <div
+                      className="card-header border-bottom bg-white"
+                      style={{
+                        borderColor: "rgba(7, 155, 150, 0.2)",
+                        padding: "0.75rem 1rem",
+                      }}
+                    >
+                      <h6 className="mb-0 fw-semibold text-dark">
+                        <i className="fas fa-female me-2 text-success"></i>
                         Mother's Information
                       </h6>
                     </div>
-                    <div className="card-body">
+                    <div className="card-body" style={{ padding: "1rem" }}>
                       {record.mother ? (
                         <>
-                          <div className="mb-3">
-                            <label className="form-label small fw-semibold text-muted mb-1">Full Name</label>
-                            <div className="fw-semibold text-dark">
-                              {record.mother.first_name} {record.mother.middle_name} {record.mother.last_name}
+                          <div style={{ marginBottom: "1rem" }}>
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Full Name
+                            </label>
+                            <div className="text-dark">
+                              {record.mother.first_name}{" "}
+                              {record.mother.middle_name}{" "}
+                              {record.mother.last_name}
                             </div>
                           </div>
                           <div className="row">
                             <div className="col-6 mb-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Citizenship</label>
-                              <div className="fw-semibold text-dark small">
+                              <label className="form-label fw-semibold text-dark mb-1">
+                                Citizenship
+                              </label>
+                              <div className="text-dark small">
                                 {record.mother.citizenship}
                               </div>
                             </div>
                             <div className="col-6 mb-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Religion</label>
-                              <div className="fw-semibold text-dark small">
-                                {record.mother.religion || 'Not specified'}
-                              </div>
-                            </div>
-                            <div className="col-6 mb-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Occupation</label>
-                              <div className="fw-semibold text-dark small">
-                                {record.mother.occupation || 'Not specified'}
-                              </div>
-                            </div>
-                            <div className="col-6 mb-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Age at Birth</label>
-                              <div className="fw-semibold text-dark small">
+                              <label className="form-label fw-semibold text-dark mb-1">
+                                Age at Birth
+                              </label>
+                              <div className="text-dark small">
                                 {record.mother.age_at_birth}
                               </div>
                             </div>
-                            <div className="col-4 mb-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Children Born</label>
-                              <div className="fw-semibold text-dark small">
-                                {record.mother.children_born_alive}
+                            <div className="col-6 mb-2">
+                              <label className="form-label fw-semibold text-dark mb-1">
+                                Occupation
+                              </label>
+                              <div className="text-dark small">
+                                {record.mother.occupation || "Not specified"}
                               </div>
                             </div>
-                            <div className="col-4 mb-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Living</label>
-                              <div className="fw-semibold text-dark small">
-                                {record.mother.children_still_living}
+                            <div className="col-6 mb-2">
+                              <label className="form-label fw-semibold text-dark mb-1">
+                                Religion
+                              </label>
+                              <div className="text-dark small">
+                                {record.mother.religion || "Not specified"}
                               </div>
                             </div>
-                            <div className="col-4 mb-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Deceased</label>
-                              <div className="fw-semibold text-dark small">
-                                {record.mother.children_deceased}
-                              </div>
-                            </div>
-                            <div className="col-12 mt-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Address</label>
-                              <div className="fw-semibold text-dark small">
-                                {[record.mother.house_no, record.mother.barangay, record.mother.city, record.mother.province, record.mother.country]
-                                  .filter(Boolean).join(', ')}
-                              </div>
+                          </div>
+                          <div className="mt-2">
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Address
+                            </label>
+                            <div className="text-dark small">
+                              {[
+                                record.mother.house_no,
+                                record.mother.barangay,
+                                record.mother.city,
+                                record.mother.province,
+                                record.mother.country,
+                              ]
+                                .filter(Boolean)
+                                .join(", ")}
                             </div>
                           </div>
                         </>
@@ -298,54 +439,85 @@ const ViewBirthRecordModal = ({ record, onClose }) => {
                   </div>
                 </div>
 
-                <div className="col-md-6">
-                  <div className="card border-0 shadow-sm h-100">
-                    <div className="card-header bg-info text-white">
-                      <h6 className="mb-0">
-                        <i className="fas fa-male me-2"></i>
+                {/* Father's Information */}
+                <div className="col-12 col-md-6">
+                  <div
+                    className="card border-0 bg-white"
+                    style={{ height: "100%" }}
+                  >
+                    <div
+                      className="card-header border-bottom bg-white"
+                      style={{
+                        borderColor: "rgba(7, 155, 150, 0.2)",
+                        padding: "0.75rem 1rem",
+                      }}
+                    >
+                      <h6 className="mb-0 fw-semibold text-dark">
+                        <i className="fas fa-male me-2 text-info"></i>
                         Father's Information
                       </h6>
                     </div>
-                    <div className="card-body">
+                    <div className="card-body" style={{ padding: "1rem" }}>
                       {record.father ? (
                         <>
-                          <div className="mb-3">
-                            <label className="form-label small fw-semibold text-muted mb-1">Full Name</label>
-                            <div className="fw-semibold text-dark">
-                              {record.father.first_name} {record.father.middle_name} {record.father.last_name}
+                          <div style={{ marginBottom: "1rem" }}>
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Full Name
+                            </label>
+                            <div className="text-dark">
+                              {record.father.first_name}{" "}
+                              {record.father.middle_name}{" "}
+                              {record.father.last_name}
                             </div>
                           </div>
                           <div className="row">
                             <div className="col-6 mb-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Citizenship</label>
-                              <div className="fw-semibold text-dark small">
+                              <label className="form-label fw-semibold text-dark mb-1">
+                                Citizenship
+                              </label>
+                              <div className="text-dark small">
                                 {record.father.citizenship}
                               </div>
                             </div>
                             <div className="col-6 mb-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Religion</label>
-                              <div className="fw-semibold text-dark small">
-                                {record.father.religion || 'Not specified'}
-                              </div>
-                            </div>
-                            <div className="col-6 mb-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Occupation</label>
-                              <div className="fw-semibold text-dark small">
-                                {record.father.occupation || 'Not specified'}
-                              </div>
-                            </div>
-                            <div className="col-6 mb-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Age at Birth</label>
-                              <div className="fw-semibold text-dark small">
+                              <label className="form-label fw-semibold text-dark mb-1">
+                                Age at Birth
+                              </label>
+                              <div className="text-dark small">
                                 {record.father.age_at_birth}
                               </div>
                             </div>
-                            <div className="col-12 mt-2">
-                              <label className="form-label small fw-semibold text-muted mb-1">Address</label>
-                              <div className="fw-semibold text-dark small">
-                                {[record.father.house_no, record.father.barangay, record.father.city, record.father.province, record.father.country]
-                                  .filter(Boolean).join(', ')}
+                            <div className="col-6 mb-2">
+                              <label className="form-label fw-semibold text-dark mb-1">
+                                Occupation
+                              </label>
+                              <div className="text-dark small">
+                                {record.father.occupation || "Not specified"}
                               </div>
+                            </div>
+                            <div className="col-6 mb-2">
+                              <label className="form-label fw-semibold text-dark mb-1">
+                                Religion
+                              </label>
+                              <div className="text-dark small">
+                                {record.father.religion || "Not specified"}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-2">
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Address
+                            </label>
+                            <div className="text-dark small">
+                              {[
+                                record.father.house_no,
+                                record.father.barangay,
+                                record.father.city,
+                                record.father.province,
+                                record.father.country,
+                              ]
+                                .filter(Boolean)
+                                .join(", ")}
                             </div>
                           </div>
                         </>
@@ -362,26 +534,43 @@ const ViewBirthRecordModal = ({ record, onClose }) => {
                 {/* Parents Marriage Information */}
                 {record.parents_marriage && (
                   <div className="col-12">
-                    <div className="card border-0 shadow-sm">
-                      <div className="card-header bg-warning text-dark">
-                        <h6 className="mb-0">
-                          <i className="fas fa-ring me-2"></i>
+                    <div className="card border-0 bg-white">
+                      <div
+                        className="card-header border-bottom bg-white"
+                        style={{
+                          borderColor: "rgba(7, 155, 150, 0.2)",
+                          padding: "0.75rem 1rem",
+                        }}
+                      >
+                        <h6 className="mb-0 fw-semibold text-dark">
+                          <i className="fas fa-ring me-2 text-warning"></i>
                           Parents Marriage Information
                         </h6>
                       </div>
-                      <div className="card-body">
+                      <div className="card-body" style={{ padding: "1rem" }}>
                         <div className="row">
                           <div className="col-md-4 mb-3">
-                            <label className="form-label small fw-semibold text-muted mb-1">Marriage Date</label>
-                            <div className="fw-semibold text-dark">
-                              {formatDate(record.parents_marriage.marriage_date)}
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Marriage Date
+                            </label>
+                            <div className="text-dark">
+                              {formatDate(
+                                record.parents_marriage.marriage_date
+                              )}
                             </div>
                           </div>
                           <div className="col-md-8 mb-3">
-                            <label className="form-label small fw-semibold text-muted mb-1">Place of Marriage</label>
-                            <div className="fw-semibold text-dark">
-                              {[record.parents_marriage.marriage_place_city, record.parents_marriage.marriage_place_province, record.parents_marriage.marriage_place_country]
-                                .filter(Boolean).join(', ')}
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Place of Marriage
+                            </label>
+                            <div className="text-dark">
+                              {[
+                                record.parents_marriage.marriage_place_city,
+                                record.parents_marriage.marriage_place_province,
+                                record.parents_marriage.marriage_place_country,
+                              ]
+                                .filter(Boolean)
+                                .join(", ")}
                             </div>
                           </div>
                         </div>
@@ -390,52 +579,63 @@ const ViewBirthRecordModal = ({ record, onClose }) => {
                   </div>
                 )}
 
-                {/* Attendant Information */}
+                {/* Birth Attendant */}
                 {record.attendant && (
-                  <div className="col-md-6">
-                    <div className="card border-0 shadow-sm h-100">
-                      <div className="card-header bg-secondary text-white">
-                        <h6 className="mb-0">
-                          <i className="fas fa-user-md me-2"></i>
+                  <div className="col-12 col-md-6">
+                    <div className="card border-0 bg-white">
+                      <div
+                        className="card-header border-bottom bg-white"
+                        style={{
+                          borderColor: "rgba(7, 155, 150, 0.2)",
+                          padding: "0.75rem 1rem",
+                        }}
+                      >
+                        <h6 className="mb-0 fw-semibold text-dark">
+                          <i className="fas fa-user-md me-2 text-primary"></i>
                           Birth Attendant
                         </h6>
                       </div>
-                      <div className="card-body">
-                        <div className="mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Name</label>
-                          <div className="fw-semibold text-dark">
+                      <div className="card-body" style={{ padding: "1rem" }}>
+                        <div style={{ marginBottom: "1rem" }}>
+                          <label className="form-label fw-semibold text-dark mb-1">
+                            Name
+                          </label>
+                          <div className="text-dark">
                             {record.attendant.attendant_name}
                           </div>
                         </div>
                         <div className="row">
                           <div className="col-6 mb-2">
-                            <label className="form-label small fw-semibold text-muted mb-1">Type</label>
-                            <div className="fw-semibold text-dark small">
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Type
+                            </label>
+                            <div className="text-dark small">
                               {record.attendant.attendant_type}
                             </div>
                           </div>
                           <div className="col-6 mb-2">
-                            <label className="form-label small fw-semibold text-muted mb-1">License</label>
-                            <div className="fw-semibold text-dark small">
-                              {record.attendant.attendant_license || 'Not specified'}
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              License
+                            </label>
+                            <div className="text-dark small">
+                              {record.attendant.attendant_license ||
+                                "Not specified"}
                             </div>
                           </div>
                           <div className="col-12 mb-2">
-                            <label className="form-label small fw-semibold text-muted mb-1">Title/Position</label>
-                            <div className="fw-semibold text-dark small">
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Title/Position
+                            </label>
+                            <div className="text-dark small">
                               {record.attendant.attendant_title}
                             </div>
                           </div>
-                          <div className="col-12 mb-2">
-                            <label className="form-label small fw-semibold text-muted mb-1">Address</label>
-                            <div className="fw-semibold text-dark small">
+                          <div className="col-12">
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Address
+                            </label>
+                            <div className="text-dark small">
                               {record.attendant.attendant_address}
-                            </div>
-                          </div>
-                          <div className="col-12 mt-2">
-                            <label className="form-label small fw-semibold text-muted mb-1">Certification</label>
-                            <div className="text-dark small" style={{ whiteSpace: 'pre-wrap' }}>
-                              {record.attendant.attendant_certification}
                             </div>
                           </div>
                         </div>
@@ -444,41 +644,65 @@ const ViewBirthRecordModal = ({ record, onClose }) => {
                   </div>
                 )}
 
-                {/* Informant Information */}
+                {/* Informant */}
                 {record.informant && (
-                  <div className="col-md-6">
-                    <div className="card border-0 shadow-sm h-100">
-                      <div className="card-header bg-dark text-white">
-                        <h6 className="mb-0">
-                          <i className="fas fa-user me-2"></i>
+                  <div className="col-12 col-md-6">
+                    <div className="card border-0 bg-white">
+                      <div
+                        className="card-header border-bottom bg-white"
+                        style={{
+                          borderColor: "rgba(7, 155, 150, 0.2)",
+                          padding: "0.75rem 1rem",
+                        }}
+                      >
+                        <h6 className="mb-0 fw-semibold text-dark">
+                          <i className="fas fa-user me-2 text-secondary"></i>
                           Informant
                         </h6>
                       </div>
-                      <div className="card-body">
-                        <div className="mb-3">
-                          <label className="form-label small fw-semibold text-muted mb-1">Full Name</label>
-                          <div className="fw-semibold text-dark">
-                            {record.informant.first_name} {record.informant.middle_name} {record.informant.last_name}
+                      <div className="card-body" style={{ padding: "1rem" }}>
+                        <div style={{ marginBottom: "1rem" }}>
+                          <label className="form-label fw-semibold text-dark mb-1">
+                            Full Name
+                          </label>
+                          <div className="text-dark">
+                            {record.informant.first_name}{" "}
+                            {record.informant.middle_name}{" "}
+                            {record.informant.last_name}
                           </div>
                         </div>
                         <div className="row">
                           <div className="col-6 mb-2">
-                            <label className="form-label small fw-semibold text-muted mb-1">Relationship</label>
-                            <div className="fw-semibold text-dark small">
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Relationship
+                            </label>
+                            <div className="text-dark small">
                               {record.informant.relationship}
                             </div>
                           </div>
                           <div className="col-6 mb-2">
-                            <label className="form-label small fw-semibold text-muted mb-1">Certification</label>
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Certification
+                            </label>
                             <div>
-                              <span className={`badge ${record.informant.certification_accepted ? 'bg-success' : 'bg-danger'}`}>
-                                {record.informant.certification_accepted ? 'Accepted' : 'Not Accepted'}
+                              <span
+                                className={`badge ${
+                                  record.informant.certification_accepted
+                                    ? "bg-success"
+                                    : "bg-danger"
+                                } text-white`}
+                              >
+                                {record.informant.certification_accepted
+                                  ? "Accepted"
+                                  : "Not Accepted"}
                               </span>
                             </div>
                           </div>
-                          <div className="col-12 mt-2">
-                            <label className="form-label small fw-semibold text-muted mb-1">Address</label>
-                            <div className="fw-semibold text-dark small">
+                          <div className="col-12">
+                            <label className="form-label fw-semibold text-dark mb-1">
+                              Address
+                            </label>
+                            <div className="text-dark small">
                               {record.informant.address}
                             </div>
                           </div>
@@ -490,30 +714,49 @@ const ViewBirthRecordModal = ({ record, onClose }) => {
 
                 {/* System Information */}
                 <div className="col-12">
-                  <div className="card border-0 bg-light">
-                    <div className="card-header bg-transparent">
-                      <h6 className="mb-0 text-muted">
-                        <i className="fas fa-cog me-2"></i>
+                  <div className="card border-0 bg-white">
+                    <div
+                      className="card-header border-bottom bg-white"
+                      style={{
+                        borderColor: "rgba(7, 155, 150, 0.2)",
+                        padding: "0.75rem 1rem",
+                      }}
+                    >
+                      <h6 className="mb-0 fw-semibold text-dark">
+                        <i className="fas fa-cog me-2 text-muted"></i>
                         System Information
                       </h6>
                     </div>
-                    <div className="card-body">
+                    <div className="card-body" style={{ padding: "1rem" }}>
                       <div className="row">
                         <div className="col-md-4">
-                          <label className="form-label small fw-semibold text-muted mb-1">Encoded By</label>
-                          <div className="fw-semibold text-dark">
-                            {record.encoded_by?.full_name || 'System'}
+                          <label className="form-label fw-semibold text-dark mb-1">
+                            Encoded By
+                          </label>
+                          <div className="text-dark">
+                            {encoderInfo.full_name}
                           </div>
+                          <small className="text-muted">
+                            {getDisplayType(encoderInfo.user_type)} •{" "}
+                            {getDisplayDetails(
+                              encoderInfo.user_type,
+                              encoderInfo.position
+                            )}
+                          </small>
                         </div>
                         <div className="col-md-4">
-                          <label className="form-label small fw-semibold text-muted mb-1">Date Registered</label>
-                          <div className="fw-semibold text-dark">
+                          <label className="form-label fw-semibold text-dark mb-1">
+                            Date Registered
+                          </label>
+                          <div className="text-dark">
                             {formatDate(record.date_registered)}
                           </div>
                         </div>
                         <div className="col-md-4">
-                          <label className="form-label small fw-semibold text-muted mb-1">Last Updated</label>
-                          <div className="fw-semibold text-dark">
+                          <label className="form-label fw-semibold text-dark mb-1">
+                            Last Updated
+                          </label>
+                          <div className="text-dark">
                             {formatDate(record.updated_at)}
                           </div>
                         </div>
@@ -528,21 +771,26 @@ const ViewBirthRecordModal = ({ record, onClose }) => {
             <div className="modal-footer border-top bg-white">
               <button
                 type="button"
-                className="btn btn-secondary"
+                className="btn btn-primary text-white fw-semibold"
                 onClick={onClose}
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => {
-                  // Add print functionality here
-                  window.print();
+                style={{
+                  backgroundColor: "#079B96",
+                  borderColor: "#079B96",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = "#067a75";
+                  e.target.style.borderColor = "#067a75";
+                  e.target.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = "#079B96";
+                  e.target.style.borderColor = "#079B96";
+                  e.target.style.transform = "translateY(0)";
                 }}
               >
-                <i className="fas fa-print me-2"></i>
-                Print
+                <i className="fas fa-times me-2"></i>
+                Close
               </button>
             </div>
           </div>
@@ -550,6 +798,37 @@ const ViewBirthRecordModal = ({ record, onClose }) => {
       </div>
 
       <style>{`
+        /* NUCLEAR CSS - This will definitely work */
+        .modal-header {
+          all: unset !important;
+        }
+        
+        .modal-header[style] {
+          all: unset !important;
+          background: #079B96 !important;
+          background-color: #079B96 !important;
+          background-image: none !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          padding: 1rem 1.5rem !important;
+          border-bottom: none !important;
+          color: white !important;
+        }
+        
+        /* Remove any pseudo-elements */
+        .modal-header::before,
+        .modal-header::after {
+          display: none !important;
+          content: none !important;
+        }
+        
+        /* Override CSS variables at the root level */
+        :root {
+          --primary-color: #079B96 !important;
+          --primary-light: #079B96 !important;
+        }
+
         @media print {
           body * {
             visibility: hidden;

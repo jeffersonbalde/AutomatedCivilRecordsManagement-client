@@ -1,22 +1,20 @@
-// src/pages/BirthRecords/components/AddBirthRecordModal.jsx
+// src/pages/DeathRecords/components/AddDeathRecordModal.jsx
 import React, { useState, useEffect } from "react";
 import Portal from "../../../components/Portal";
 import { showAlert, showToast } from "../../../services/notificationService";
 
 // Import from the new separate file
 import {
-  Step1ChildInfo,
-  Step2MotherInfo,
-  Step3FatherInfo,
-  Step4ParentsMarriage,
-  Step5BirthDetails,
-  Step6AttendantInfo,
-  Step7InformantInfo,
-  Step8Finalize,
+  Step1PersonalInfo,
+  Step2MedicalInfo,
+  Step3DeathCertification,
+  Step4BurialDetails,
+  Step5InformantInfo,
+  Step6Finalize,
   formatDate,
-} from "./BirthRecordStepComponents";
+} from "./DeathRecordStepComponents";
 
-const AddBirthRecordModal = ({ onClose, onSave, token }) => {
+const AddDeathRecordModal = ({ onClose, onSave, token }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -29,94 +27,78 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
 
   // Form data state
   const [formData, setFormData] = useState({
-    // Step 1: Child Information
-    child_first_name: "",
-    child_middle_name: "",
-    child_last_name: "",
+    // Step 1: Personal Information
+    first_name: "",
+    middle_name: "",
+    last_name: "",
     sex: "",
+    civil_status: "",
+    date_of_death: "",
     date_of_birth: "",
-    time_of_birth: "",
-    place_of_birth: "",
-    birth_address_house: "",
-    birth_address_barangay: "",
-    birth_address_city: "",
-    birth_address_province: "",
-    type_of_birth: "Single",
-    multiple_birth_order: "",
-    birth_order: 1,
-    birth_weight: "",
-    birth_notes: "",
+    age_years: "",
+    age_months: "",
+    age_days: "",
+    age_hours: "",
+    age_minutes: "",
+    age_under_1: false,
+    place_of_death: "",
+    religion: "",
+    citizenship: "Filipino",
+    residence: "",
+    occupation: "",
+    father_name: "",
+    mother_maiden_name: "",
 
-    // Step 2: Mother Information
-    mother_first_name: "",
-    mother_middle_name: "",
-    mother_last_name: "",
-    mother_citizenship: "Filipino",
-    mother_religion: "",
-    mother_occupation: "",
-    mother_age_at_birth: "",
-    mother_children_born_alive: 0,
-    mother_children_still_living: 0,
-    mother_children_deceased: 0,
-    mother_house_no: "",
-    mother_barangay: "",
-    mother_city: "",
-    mother_province: "",
-    mother_country: "Philippines",
+    // Step 2: Medical Information
+    immediate_cause: "",
+    antecedent_cause: "",
+    underlying_cause: "",
+    other_significant_conditions: "",
+    maternal_condition: "",
+    manner_of_death: "",
+    place_of_occurrence: "",
+    autopsy: "",
+    attendant: "",
+    attendant_other: "",
+    attended_from: "",
+    attended_to: "",
 
-    // Step 3: Father Information
-    father_first_name: "",
-    father_middle_name: "",
-    father_last_name: "",
-    father_citizenship: "Filipino",
-    father_religion: "",
-    father_occupation: "",
-    father_age_at_birth: "",
-    father_house_no: "",
-    father_barangay: "",
-    father_city: "",
-    father_province: "",
-    father_country: "Philippines",
+    // Step 3: Death Certification
+    certifier_signature: "",
+    certifier_name: "",
+    certifier_title: "",
+    certifier_address: "",
+    certifier_date: "",
+    attended_deceased: "",
+    death_occurred_time: "",
 
-    // Step 4: Parents Marriage
-    marriage_date: "",
-    marriage_place_city: "",
-    marriage_place_province: "",
-    marriage_place_country: "Philippines",
+    // Step 4: Burial Details
+    corpse_disposal: "",
+    burial_permit_number: "",
+    burial_permit_date: "",
+    transfer_permit_number: "",
+    transfer_permit_date: "",
+    cemetery_name: "",
+    cemetery_address: "",
 
-    // Step 5: Birth Details
-    // (already included in step 1)
-
-    // Step 6: Attendant Information
-    attendant_type: "",
-    attendant_name: "",
-    attendant_license: "",
-    attendant_certification:
-      "I hereby certify that I attended the birth of the child who was born alive at the time and date specified above.",
-    attendant_address: "",
-    attendant_title: "",
-
-    // Step 7: Informant Information
-    informant_first_name: "",
-    informant_middle_name: "",
-    informant_last_name: "",
+    // Step 5: Informant Information
+    informant_signature: "",
+    informant_name: "",
     informant_relationship: "",
     informant_address: "",
-    informant_certification_accepted: false,
+    informant_date: "",
   });
 
   const [errors, setErrors] = useState({});
 
   // Step configurations
   const steps = [
-    { number: 1, title: "Child Info", completed: false },
-    { number: 2, title: "Mother", completed: false },
-    { number: 3, title: "Father", completed: false },
-    { number: 4, title: "Parents Marriage", completed: false },
-    { number: 5, title: "Birth Details", completed: false },
-    { number: 6, title: "Attendant", completed: false },
-    { number: 7, title: "Informant", completed: false },
-    { number: 8, title: "Finalize", completed: false },
+    { number: 1, title: "Personal Info", completed: false },
+    { number: 2, title: "Medical Info", completed: false },
+    { number: 3, title: "Certification", completed: false },
+    { number: 4, title: "Burial Details", completed: false },
+    { number: 5, title: "Informant", completed: false },
+    { number: 6, title: "Finalize", completed: false },
   ];
 
   // Handle input changes
@@ -139,9 +121,11 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
       }));
     }
 
-    // Check for duplicates on key child fields
+    // Check for duplicates on key fields
     if (
-      ["child_first_name", "child_last_name", "date_of_birth"].includes(name)
+      ["first_name", "last_name", "date_of_death", "date_of_birth"].includes(
+        name
+      )
     ) {
       checkForDuplicates();
     }
@@ -149,15 +133,15 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
 
   // Enhanced duplicate check with debouncing
   const checkForDuplicates = React.useCallback(
-    async (childFirstName, childLastName, dateOfBirth) => {
-      if (!childFirstName || !childLastName || !dateOfBirth) {
+    async (firstName, lastName, dateOfDeath, dateOfBirth) => {
+      if (!firstName || !lastName || !dateOfDeath || !dateOfBirth) {
         setDuplicateAlert({ show: false, message: "", similarRecords: [] });
         return;
       }
 
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_LARAVEL_API}/birth-records/check-duplicate`,
+          `${import.meta.env.VITE_LARAVEL_API}/death-records/check-duplicate`,
           {
             method: "POST",
             headers: {
@@ -166,8 +150,9 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
               Accept: "application/json",
             },
             body: JSON.stringify({
-              child_first_name: childFirstName,
-              child_last_name: childLastName,
+              first_name: firstName,
+              last_name: lastName,
+              date_of_death: dateOfDeath,
               date_of_birth: dateOfBirth,
             }),
           }
@@ -179,8 +164,8 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
           if (data.is_duplicate) {
             setDuplicateAlert({
               show: true,
-              message: `⚠️ Duplicate record found! A birth record for "${childFirstName} ${childLastName}" born on ${formatDate(
-                dateOfBirth
+              message: `⚠️ Duplicate record found! A death record for "${firstName} ${lastName}" died on ${formatDate(
+                dateOfDeath
               )} already exists in the system.`,
               similarRecords: data.similar_records || [],
               isExactDuplicate: true,
@@ -207,16 +192,18 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
       checkForDuplicates(
-        formData.child_first_name,
-        formData.child_last_name,
+        formData.first_name,
+        formData.last_name,
+        formData.date_of_death,
         formData.date_of_birth
       );
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timeoutId);
   }, [
-    formData.child_first_name,
-    formData.child_last_name,
+    formData.first_name,
+    formData.last_name,
+    formData.date_of_death,
     formData.date_of_birth,
     checkForDuplicates,
   ]);
@@ -264,12 +251,12 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
                         <div className="row align-items-center">
                           <div className="col-md-4">
                             <strong>
-                              {record.child_first_name} {record.child_last_name}
+                              {record.first_name} {record.last_name}
                             </strong>
                           </div>
                           <div className="col-md-3">
                             <small className="text-muted">
-                              Born: {formatDate(record.date_of_birth)}
+                              Died: {formatDate(record.date_of_death)}
                             </small>
                           </div>
                           <div className="col-md-3">
@@ -303,8 +290,9 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
                   // Clear the conflicting fields
                   setFormData((prev) => ({
                     ...prev,
-                    child_first_name: "",
-                    child_last_name: "",
+                    first_name: "",
+                    last_name: "",
+                    date_of_death: "",
                     date_of_birth: "",
                   }));
                   setDuplicateAlert({
@@ -362,7 +350,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
     if (duplicateAlert.isExactDuplicate) {
       showAlert.error(
         "Duplicate Record",
-        "Cannot save record. An exact duplicate already exists in the system. Please modify the child's name or date of birth."
+        "Cannot save record. An exact duplicate already exists in the system. Please modify the name or dates."
       );
       return false;
     }
@@ -374,82 +362,49 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
     const newErrors = {};
 
     switch (currentStep) {
-      case 1: // Child Information
-        if (!formData.child_first_name.trim())
-          newErrors.child_first_name = "First name is required";
-        if (!formData.child_last_name.trim())
-          newErrors.child_last_name = "Last name is required";
+      case 1: // Personal Information
+        if (!formData.first_name.trim())
+          newErrors.first_name = "First name is required";
+        if (!formData.last_name.trim())
+          newErrors.last_name = "Last name is required";
         if (!formData.sex) newErrors.sex = "Sex is required";
+        if (!formData.civil_status)
+          newErrors.civil_status = "Civil status is required";
+        if (!formData.date_of_death)
+          newErrors.date_of_death = "Date of death is required";
         if (!formData.date_of_birth)
           newErrors.date_of_birth = "Date of birth is required";
-        if (!formData.place_of_birth.trim())
-          newErrors.place_of_birth = "Place of birth is required";
-        if (!formData.birth_address_city.trim())
-          newErrors.birth_address_city = "City is required";
-        if (!formData.type_of_birth)
-          newErrors.type_of_birth = "Type of birth is required";
-        if (!formData.birth_order || formData.birth_order < 1)
-          newErrors.birth_order = "Valid birth order is required";
+        if (!formData.place_of_death.trim())
+          newErrors.place_of_death = "Place of death is required";
+        if (!formData.citizenship.trim())
+          newErrors.citizenship = "Citizenship is required";
+        if (!formData.residence.trim())
+          newErrors.residence = "Residence is required";
+        if (!formData.father_name.trim())
+          newErrors.father_name = "Father's name is required";
+        if (!formData.mother_maiden_name.trim())
+          newErrors.mother_maiden_name = "Mother's maiden name is required";
         break;
 
-      case 2: // Mother Information
-        if (!formData.mother_first_name.trim())
-          newErrors.mother_first_name = "First name is required";
-        if (!formData.mother_last_name.trim())
-          newErrors.mother_last_name = "Last name is required";
-        if (!formData.mother_citizenship.trim())
-          newErrors.mother_citizenship = "Citizenship is required";
-        if (!formData.mother_age_at_birth || formData.mother_age_at_birth < 15)
-          newErrors.mother_age_at_birth = "Valid age is required (minimum 15)";
-        if (!formData.mother_barangay.trim())
-          newErrors.mother_barangay = "Barangay is required";
-        if (!formData.mother_city.trim())
-          newErrors.mother_city = "City is required";
+      case 2: // Medical Information
+        if (!formData.immediate_cause.trim())
+          newErrors.immediate_cause = "Immediate cause is required";
+        if (!formData.attendant) newErrors.attendant = "Attendant is required";
         break;
 
-      case 3: // Father Information
-        if (!formData.father_first_name.trim())
-          newErrors.father_first_name = "First name is required";
-        if (!formData.father_last_name.trim())
-          newErrors.father_last_name = "Last name is required";
-        if (!formData.father_citizenship.trim())
-          newErrors.father_citizenship = "Citizenship is required";
-        if (!formData.father_age_at_birth || formData.father_age_at_birth < 15)
-          newErrors.father_age_at_birth = "Valid age is required (minimum 15)";
-        if (!formData.father_barangay.trim())
-          newErrors.father_barangay = "Barangay is required";
-        if (!formData.father_city.trim())
-          newErrors.father_city = "City is required";
+      case 3: // Death Certification
+        if (!formData.certifier_name.trim())
+          newErrors.certifier_name = "Certifier name is required";
         break;
 
-      case 6: // Attendant Information
-        if (!formData.attendant_type)
-          newErrors.attendant_type = "Attendant type is required";
-        if (!formData.attendant_name.trim())
-          newErrors.attendant_name = "Attendant name is required";
-        if (!formData.attendant_certification.trim())
-          newErrors.attendant_certification = "Certification is required";
-        if (!formData.attendant_address.trim())
-          newErrors.attendant_address = "Address is required";
-        if (!formData.attendant_title.trim())
-          newErrors.attendant_title = "Title is required";
-        break;
-
-      case 7: // Informant Information
-        if (!formData.informant_first_name.trim())
-          newErrors.informant_first_name = "First name is required";
-        if (!formData.informant_last_name.trim())
-          newErrors.informant_last_name = "Last name is required";
+      case 5: // Informant Information
+        if (!formData.informant_name.trim())
+          newErrors.informant_name = "Informant name is required";
         if (!formData.informant_relationship.trim())
           newErrors.informant_relationship = "Relationship is required";
-        if (!formData.informant_address.trim())
-          newErrors.informant_address = "Address is required";
-        if (!formData.informant_certification_accepted)
-          newErrors.informant_certification_accepted =
-            "Certification must be accepted";
         break;
 
-      case 8: // Finalize
+      case 6: // Finalize
         // No validation needed for final step, just confirmation
         break;
     }
@@ -509,7 +464,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
 
     const confirmation = await showAlert.confirm(
       "Confirm Submission",
-      "Are you sure you want to save this birth record? This action cannot be undone.",
+      "Are you sure you want to save this death record? This action cannot be undone.",
       "Yes, Save Record",
       "Review Details"
     );
@@ -519,13 +474,13 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
     // Show processing alert for loading state
     showAlert.processing(
       "Saving Record",
-      "Please wait while we save the birth record..."
+      "Please wait while we save the death record..."
     );
     setLoading(true);
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_LARAVEL_API}/birth-records`,
+        `${import.meta.env.VITE_LARAVEL_API}/death-records`,
         {
           method: "POST",
           headers: {
@@ -543,7 +498,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
         // Close the processing alert
         showAlert.close();
 
-        showToast.success("Birth record saved successfully!");
+        showToast.success("Death record saved successfully!");
 
         setHasUnsavedChanges(false);
 
@@ -565,15 +520,15 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
           );
           setErrors(data.errors);
         } else {
-          throw new Error(data.message || "Failed to save birth record");
+          throw new Error(data.message || "Failed to save death record");
         }
       }
     } catch (error) {
       // Close the processing alert
       showAlert.close();
 
-      console.error("Error saving birth record:", error);
-      showAlert.error("Error", error.message || "Failed to save birth record");
+      console.error("Error saving death record:", error);
+      showAlert.error("Error", error.message || "Failed to save death record");
     } finally {
       setLoading(false);
     }
@@ -619,7 +574,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
     switch (currentStep) {
       case 1:
         return (
-          <Step1ChildInfo
+          <Step1PersonalInfo
             formData={formData}
             errors={errors}
             onChange={handleInputChange}
@@ -627,7 +582,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
         );
       case 2:
         return (
-          <Step2MotherInfo
+          <Step2MedicalInfo
             formData={formData}
             errors={errors}
             onChange={handleInputChange}
@@ -635,7 +590,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
         );
       case 3:
         return (
-          <Step3FatherInfo
+          <Step3DeathCertification
             formData={formData}
             errors={errors}
             onChange={handleInputChange}
@@ -643,7 +598,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
         );
       case 4:
         return (
-          <Step4ParentsMarriage
+          <Step4BurialDetails
             formData={formData}
             errors={errors}
             onChange={handleInputChange}
@@ -651,30 +606,14 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
         );
       case 5:
         return (
-          <Step5BirthDetails
+          <Step5InformantInfo
             formData={formData}
             errors={errors}
             onChange={handleInputChange}
           />
         );
       case 6:
-        return (
-          <Step6AttendantInfo
-            formData={formData}
-            errors={errors}
-            onChange={handleInputChange}
-          />
-        );
-      case 7:
-        return (
-          <Step7InformantInfo
-            formData={formData}
-            errors={errors}
-            onChange={handleInputChange}
-          />
-        );
-      case 8:
-        return <Step8Finalize formData={formData} />;
+        return <Step6Finalize formData={formData} />;
       default:
         return null;
     }
@@ -696,12 +635,12 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
           >
             {/* Header */}
             <div
-              id="birth-record-modal-header"
+              id="death-record-modal-header"
               className="modal-header border-0 text-white"
             >
               <h5 className="modal-title fw-bold">
                 <i className="fas fa-plus me-2"></i>
-                Add New Birth Record
+                Add New Death Record
               </h5>
               <button
                 type="button"
@@ -812,7 +751,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
                 </div>
                 <h5 className="mb-2">Saving Record</h5>
                 <p className="text-muted mb-0">
-                  Please wait while we save the birth record...
+                  Please wait while we save the death record...
                 </p>
               </div>
             </div>
@@ -822,35 +761,35 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
 
       <style>{`
   /* Force solid color header with maximum specificity */
-  #birth-record-modal-header {
-    background: #018181 !important;
-    background-image: none !important;
-    background-color: #018181 !important;
-  }
+#death-record-modal-header {
+  background: #018181 !important;
+  background-image: none !important;
+  background-color: #018181 !important;
+}
   
   /* Override any potential gradient from parent or Bootstrap classes */
-  .modal-header#birth-record-modal-header {
+  .modal-header#death-record-modal-header {
     background: #018181 !important;
     background-image: none !important;
     background-color: #018181 !important;
   }
   
   /* Nuclear option - target any modal header with this ID */
-  div#birth-record-modal-header.modal-header {
+  div#death-record-modal-header.modal-header {
     background: #018181 !important;
     background-image: none !important;
     background-color: #018181 !important;
   }
   
   /* Remove any gradient images or overlays */
-  #birth-record-modal-header::before,
-  #birth-record-modal-header::after {
+  #death-record-modal-header::before,
+  #death-record-modal-header::after {
     display: none !important;
     background-image: none !important;
   }
   
   /* Ensure no background images are applied */
-  #birth-record-modal-header {
+  #death-record-modal-header {
     background-image: none !important;
   }
 
@@ -901,17 +840,19 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
     transition: all 0.3s;
   }
 
-  .step-responsive.active .step-circle {
-    background: #018181;
-    border-color: #018181;
-    color: white;
-  }
+// Update stepper active and completed states
+.step-responsive.active .step-circle {
+  background: #018181;
+  border-color: #018181;
+  color: white;
+}
 
-  .step-responsive.completed .step-circle {
-    background: #018181;
-    border-color: #018181;
-    color: white;
-  }
+
+.step-responsive.completed .step-circle {
+  background: #018181;
+  border-color: #018181;
+  color: white;
+}
 
   .step-title {
     font-size: 0.75rem;
@@ -920,36 +861,32 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
     font-weight: 500;
   }
 
-  .step-responsive.active .step-title {
-    color: #018181;
-    font-weight: 600;
-  }
+.step-responsive.active .step-title {
+  color: #018181;
+  font-weight: 600;
+}
 
-  .step-responsive.completed .step-title {
-    color: #018181;
-    font-weight: 600;
-  }
+.step-responsive.completed .step-title {
+  color: #018181;
+  font-weight: 600;
+}
 
   /* Button Styles */
-  .next-button, .save-button {
-    background-color: #018181 !important;
-    border-color: #018181 !important;
-    color: white !important;
-    transition: all 0.3s ease;
-  }
+.next-button, .save-button {
+  background-color: #018181 !important;
+  border-color: #018181 !important;
+  color: white !important;
+}
 
-  .next-button:hover, .save-button:hover {
-    background-color: #016767 !important;
-    border-color: #016767 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(1, 129, 129, 0.3);
-  }
+.next-button:hover, .save-button:hover {
+  background-color: #016767 !important;
+  border-color: #016767 !important;
+}
 
-  .next-button:active, .save-button:active {
-    background-color: #015555 !important;
-    border-color: #015555 !important;
-    transform: translateY(0);
-  }
+.next-button:active, .save-button:active {
+  background-color: #015555 !important;
+  border-color: #015555 !important;
+}
 
   .next-button:disabled, .save-button:disabled {
     background-color: #6c757d !important;
@@ -1069,4 +1006,4 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
   );
 };
 
-export default AddBirthRecordModal;
+export default AddDeathRecordModal;

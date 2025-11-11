@@ -19,9 +19,9 @@ import StaffProfile from "./pages/Staff/Profile/StaffProfile";
 import UserManagement from "./pages/Admin/UserManagement/UserManagement";
 
 import BirthRecords from "./pages/Unified/BirthRecords/BirthRecords";
+import MarriageRecords from "./pages/Unified/MarriageRecords/MarriageRecords";
+import DeathRecords from "./pages/Unified/DeathRecords/DeathRecords";
 
-const MarriageRecords = () => <div>Marriage Records Management</div>;
-const DeathRecords = () => <div>Death Records Management</div>;
 const SearchRecords = () => <div>Search Records</div>;
 const GenerateCertificates = () => <div>Generate Certificates</div>;
 const IssuanceHistory = () => <div>Issuance History</div>;
@@ -204,7 +204,18 @@ function App() {
     <AuthProvider>
       <Router>
         <AppRoutes />
-        <ToastContainer />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </Router>
     </AuthProvider>
   );

@@ -1,22 +1,19 @@
-// src/pages/BirthRecords/components/AddBirthRecordModal.jsx
 import React, { useState, useEffect } from "react";
 import Portal from "../../../components/Portal";
 import { showAlert, showToast } from "../../../services/notificationService";
 
-// Import from the new separate file
+// Import step components
 import {
-  Step1ChildInfo,
-  Step2MotherInfo,
-  Step3FatherInfo,
-  Step4ParentsMarriage,
-  Step5BirthDetails,
-  Step6AttendantInfo,
-  Step7InformantInfo,
-  Step8Finalize,
+  Step1BasicInfo,
+  Step2HusbandInfo,
+  Step3WifeInfo,
+  Step4CeremonyDetails,
+  Step5WitnessInfo,
+  Step6Finalize,
   formatDate,
-} from "./BirthRecordStepComponents";
+} from "./MarriageRecordStepComponents";
 
-const AddBirthRecordModal = ({ onClose, onSave, token }) => {
+const AddMarriageRecordModal = ({ onClose, onSave, token }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -29,94 +26,85 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
 
   // Form data state
   const [formData, setFormData] = useState({
-    // Step 1: Child Information
-    child_first_name: "",
-    child_middle_name: "",
-    child_last_name: "",
-    sex: "",
-    date_of_birth: "",
-    time_of_birth: "",
-    place_of_birth: "",
-    birth_address_house: "",
-    birth_address_barangay: "",
-    birth_address_city: "",
-    birth_address_province: "",
-    type_of_birth: "Single",
-    multiple_birth_order: "",
-    birth_order: 1,
-    birth_weight: "",
-    birth_notes: "",
+    // Step 1: Basic Information
+    province: "",
+    city_municipality: "",
+    date_of_marriage: "",
+    time_of_marriage: "",
+    place_of_marriage: "",
+    marriage_type: "",
+    license_number: "",
+    license_date: "",
+    license_place: "",
+    property_regime: "",
 
-    // Step 2: Mother Information
-    mother_first_name: "",
-    mother_middle_name: "",
-    mother_last_name: "",
-    mother_citizenship: "Filipino",
-    mother_religion: "",
-    mother_occupation: "",
-    mother_age_at_birth: "",
-    mother_children_born_alive: 0,
-    mother_children_still_living: 0,
-    mother_children_deceased: 0,
-    mother_house_no: "",
-    mother_barangay: "",
-    mother_city: "",
-    mother_province: "",
-    mother_country: "Philippines",
+    // Step 2: Husband Information
+    husband_first_name: "",
+    husband_middle_name: "",
+    husband_last_name: "",
+    husband_birthdate: "",
+    husband_birthplace: "",
+    husband_sex: "",
+    husband_citizenship: "Filipino",
+    husband_religion: "",
+    husband_civil_status: "",
+    husband_occupation: "",
+    husband_address: "",
+    husband_father_name: "",
+    husband_father_citizenship: "Filipino",
+    husband_mother_name: "",
+    husband_mother_citizenship: "Filipino",
+    husband_consent_giver: "",
+    husband_consent_relationship: "",
+    husband_consent_address: "",
 
-    // Step 3: Father Information
-    father_first_name: "",
-    father_middle_name: "",
-    father_last_name: "",
-    father_citizenship: "Filipino",
-    father_religion: "",
-    father_occupation: "",
-    father_age_at_birth: "",
-    father_house_no: "",
-    father_barangay: "",
-    father_city: "",
-    father_province: "",
-    father_country: "Philippines",
+    // Step 3: Wife Information
+    wife_first_name: "",
+    wife_middle_name: "",
+    wife_last_name: "",
+    wife_birthdate: "",
+    wife_birthplace: "",
+    wife_sex: "",
+    wife_citizenship: "Filipino",
+    wife_religion: "",
+    wife_civil_status: "",
+    wife_occupation: "",
+    wife_address: "",
+    wife_father_name: "",
+    wife_father_citizenship: "Filipino",
+    wife_mother_name: "",
+    wife_mother_citizenship: "Filipino",
+    wife_consent_giver: "",
+    wife_consent_relationship: "",
+    wife_consent_address: "",
 
-    // Step 4: Parents Marriage
-    marriage_date: "",
-    marriage_place_city: "",
-    marriage_place_province: "",
-    marriage_place_country: "Philippines",
+    // Step 4: Ceremony Details
+    officiating_officer: "",
+    officiant_title: "",
+    officiant_license: "",
+    legal_basis: "",
+    legal_basis_article: "",
+    marriage_remarks: "",
 
-    // Step 5: Birth Details
-    // (already included in step 1)
-
-    // Step 6: Attendant Information
-    attendant_type: "",
-    attendant_name: "",
-    attendant_license: "",
-    attendant_certification:
-      "I hereby certify that I attended the birth of the child who was born alive at the time and date specified above.",
-    attendant_address: "",
-    attendant_title: "",
-
-    // Step 7: Informant Information
-    informant_first_name: "",
-    informant_middle_name: "",
-    informant_last_name: "",
-    informant_relationship: "",
-    informant_address: "",
-    informant_certification_accepted: false,
+    // Step 5: Witness Information
+    witness1_name: "",
+    witness1_address: "",
+    witness1_relationship: "",
+    witness2_name: "",
+    witness2_address: "",
+    witness2_relationship: "",
   });
 
   const [errors, setErrors] = useState({});
 
   // Step configurations
   const steps = [
-    { number: 1, title: "Child Info", completed: false },
-    { number: 2, title: "Mother", completed: false },
-    { number: 3, title: "Father", completed: false },
-    { number: 4, title: "Parents Marriage", completed: false },
-    { number: 5, title: "Birth Details", completed: false },
-    { number: 6, title: "Attendant", completed: false },
-    { number: 7, title: "Informant", completed: false },
-    { number: 8, title: "Finalize", completed: false },
+    { number: 1, title: "Basic Info", completed: false },
+    { number: 2, title: "Husband", completed: false },
+    { number: 3, title: "Wife", completed: false },
+    { number: 4, title: "Ceremony", completed: false },
+    { number: 5, title: "Witnesses", completed: false },
+    { number: 6, title: "Finalize", completed: false },
   ];
 
   // Handle input changes
@@ -139,9 +127,9 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
       }));
     }
 
-    // Check for duplicates on key child fields
+    // Check for duplicates on key fields
     if (
-      ["child_first_name", "child_last_name", "date_of_birth"].includes(name)
+      ["husband_first_name", "husband_last_name", "wife_first_name", "wife_last_name", "date_of_marriage"].includes(name)
     ) {
       checkForDuplicates();
     }
@@ -149,15 +137,15 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
 
   // Enhanced duplicate check with debouncing
   const checkForDuplicates = React.useCallback(
-    async (childFirstName, childLastName, dateOfBirth) => {
-      if (!childFirstName || !childLastName || !dateOfBirth) {
+    async (husbandFirstName, husbandLastName, wifeFirstName, wifeLastName, dateOfMarriage) => {
+      if (!husbandFirstName || !husbandLastName || !wifeFirstName || !wifeLastName || !dateOfMarriage) {
         setDuplicateAlert({ show: false, message: "", similarRecords: [] });
         return;
       }
 
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_LARAVEL_API}/birth-records/check-duplicate`,
+          `${import.meta.env.VITE_LARAVEL_API}/marriage-records/check-duplicate`,
           {
             method: "POST",
             headers: {
@@ -166,9 +154,11 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
               Accept: "application/json",
             },
             body: JSON.stringify({
-              child_first_name: childFirstName,
-              child_last_name: childLastName,
-              date_of_birth: dateOfBirth,
+              husband_first_name: husbandFirstName,
+              husband_last_name: husbandLastName,
+              wife_first_name: wifeFirstName,
+              wife_last_name: wifeLastName,
+              date_of_marriage: dateOfMarriage,
             }),
           }
         );
@@ -179,8 +169,8 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
           if (data.is_duplicate) {
             setDuplicateAlert({
               show: true,
-              message: `⚠️ Duplicate record found! A birth record for "${childFirstName} ${childLastName}" born on ${formatDate(
-                dateOfBirth
+              message: `⚠️ Duplicate record found! A marriage record for "${husbandFirstName} ${husbandLastName}" and "${wifeFirstName} ${wifeLastName}" married on ${formatDate(
+                dateOfMarriage
               )} already exists in the system.`,
               similarRecords: data.similar_records || [],
               isExactDuplicate: true,
@@ -207,17 +197,21 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
       checkForDuplicates(
-        formData.child_first_name,
-        formData.child_last_name,
-        formData.date_of_birth
+        formData.husband_first_name,
+        formData.husband_last_name,
+        formData.wife_first_name,
+        formData.wife_last_name,
+        formData.date_of_marriage
       );
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timeoutId);
   }, [
-    formData.child_first_name,
-    formData.child_last_name,
-    formData.date_of_birth,
+    formData.husband_first_name,
+    formData.husband_last_name,
+    formData.wife_first_name,
+    formData.wife_last_name,
+    formData.date_of_marriage,
     checkForDuplicates,
   ]);
 
@@ -264,12 +258,12 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
                         <div className="row align-items-center">
                           <div className="col-md-4">
                             <strong>
-                              {record.child_first_name} {record.child_last_name}
+                              {record.husband_first_name} {record.husband_last_name} & {record.wife_first_name} {record.wife_last_name}
                             </strong>
                           </div>
                           <div className="col-md-3">
                             <small className="text-muted">
-                              Born: {formatDate(record.date_of_birth)}
+                              Married: {formatDate(record.date_of_marriage)}
                             </small>
                           </div>
                           <div className="col-md-3">
@@ -278,12 +272,8 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
                             </small>
                           </div>
                           <div className="col-md-2">
-                            <span
-                              className={`badge ${
-                                record.sex === "Male" ? "bg-info" : "bg-pink"
-                              }`}
-                            >
-                              {record.sex}
+                            <span className="badge bg-info">
+                              {record.marriage_type}
                             </span>
                           </div>
                         </div>
@@ -303,9 +293,11 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
                   // Clear the conflicting fields
                   setFormData((prev) => ({
                     ...prev,
-                    child_first_name: "",
-                    child_last_name: "",
-                    date_of_birth: "",
+                    husband_first_name: "",
+                    husband_last_name: "",
+                    wife_first_name: "",
+                    wife_last_name: "",
+                    date_of_marriage: "",
                   }));
                   setDuplicateAlert({
                     show: false,
@@ -362,7 +354,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
     if (duplicateAlert.isExactDuplicate) {
       showAlert.error(
         "Duplicate Record",
-        "Cannot save record. An exact duplicate already exists in the system. Please modify the child's name or date of birth."
+        "Cannot save record. An exact duplicate already exists in the system. Please modify the couple's names or marriage date."
       );
       return false;
     }
@@ -374,82 +366,61 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
     const newErrors = {};
 
     switch (currentStep) {
-      case 1: // Child Information
-        if (!formData.child_first_name.trim())
-          newErrors.child_first_name = "First name is required";
-        if (!formData.child_last_name.trim())
-          newErrors.child_last_name = "Last name is required";
-        if (!formData.sex) newErrors.sex = "Sex is required";
-        if (!formData.date_of_birth)
-          newErrors.date_of_birth = "Date of birth is required";
-        if (!formData.place_of_birth.trim())
-          newErrors.place_of_birth = "Place of birth is required";
-        if (!formData.birth_address_city.trim())
-          newErrors.birth_address_city = "City is required";
-        if (!formData.type_of_birth)
-          newErrors.type_of_birth = "Type of birth is required";
-        if (!formData.birth_order || formData.birth_order < 1)
-          newErrors.birth_order = "Valid birth order is required";
+      case 1: // Basic Information
+        if (!formData.province.trim()) newErrors.province = "Province is required";
+        if (!formData.city_municipality.trim()) newErrors.city_municipality = "City/Municipality is required";
+        if (!formData.date_of_marriage) newErrors.date_of_marriage = "Date of marriage is required";
+        if (!formData.time_of_marriage) newErrors.time_of_marriage = "Time of marriage is required";
+        if (!formData.place_of_marriage.trim()) newErrors.place_of_marriage = "Place of marriage is required";
+        if (!formData.marriage_type) newErrors.marriage_type = "Type of marriage is required";
+        if (!formData.license_number.trim()) newErrors.license_number = "License number is required";
+        if (!formData.license_date) newErrors.license_date = "License date is required";
+        if (!formData.license_place.trim()) newErrors.license_place = "License place is required";
+        if (!formData.property_regime) newErrors.property_regime = "Property regime is required";
         break;
 
-      case 2: // Mother Information
-        if (!formData.mother_first_name.trim())
-          newErrors.mother_first_name = "First name is required";
-        if (!formData.mother_last_name.trim())
-          newErrors.mother_last_name = "Last name is required";
-        if (!formData.mother_citizenship.trim())
-          newErrors.mother_citizenship = "Citizenship is required";
-        if (!formData.mother_age_at_birth || formData.mother_age_at_birth < 15)
-          newErrors.mother_age_at_birth = "Valid age is required (minimum 15)";
-        if (!formData.mother_barangay.trim())
-          newErrors.mother_barangay = "Barangay is required";
-        if (!formData.mother_city.trim())
-          newErrors.mother_city = "City is required";
+      case 2: // Husband Information
+        if (!formData.husband_first_name.trim()) newErrors.husband_first_name = "First name is required";
+        if (!formData.husband_last_name.trim()) newErrors.husband_last_name = "Last name is required";
+        if (!formData.husband_birthdate) newErrors.husband_birthdate = "Date of birth is required";
+        if (!formData.husband_birthplace.trim()) newErrors.husband_birthplace = "Place of birth is required";
+        if (!formData.husband_sex) newErrors.husband_sex = "Sex is required";
+        if (!formData.husband_citizenship.trim()) newErrors.husband_citizenship = "Citizenship is required";
+        if (!formData.husband_civil_status) newErrors.husband_civil_status = "Civil status is required";
+        if (!formData.husband_address.trim()) newErrors.husband_address = "Address is required";
+        if (!formData.husband_father_name.trim()) newErrors.husband_father_name = "Father's name is required";
+        if (!formData.husband_father_citizenship.trim()) newErrors.husband_father_citizenship = "Father's citizenship is required";
+        if (!formData.husband_mother_name.trim()) newErrors.husband_mother_name = "Mother's name is required";
+        if (!formData.husband_mother_citizenship.trim()) newErrors.husband_mother_citizenship = "Mother's citizenship is required";
         break;
 
-      case 3: // Father Information
-        if (!formData.father_first_name.trim())
-          newErrors.father_first_name = "First name is required";
-        if (!formData.father_last_name.trim())
-          newErrors.father_last_name = "Last name is required";
-        if (!formData.father_citizenship.trim())
-          newErrors.father_citizenship = "Citizenship is required";
-        if (!formData.father_age_at_birth || formData.father_age_at_birth < 15)
-          newErrors.father_age_at_birth = "Valid age is required (minimum 15)";
-        if (!formData.father_barangay.trim())
-          newErrors.father_barangay = "Barangay is required";
-        if (!formData.father_city.trim())
-          newErrors.father_city = "City is required";
+      case 3: // Wife Information
+        if (!formData.wife_first_name.trim()) newErrors.wife_first_name = "First name is required";
+        if (!formData.wife_last_name.trim()) newErrors.wife_last_name = "Last name is required";
+        if (!formData.wife_birthdate) newErrors.wife_birthdate = "Date of birth is required";
+        if (!formData.wife_birthplace.trim()) newErrors.wife_birthplace = "Place of birth is required";
+        if (!formData.wife_sex) newErrors.wife_sex = "Sex is required";
+        if (!formData.wife_citizenship.trim()) newErrors.wife_citizenship = "Citizenship is required";
+        if (!formData.wife_civil_status) newErrors.wife_civil_status = "Civil status is required";
+        if (!formData.wife_address.trim()) newErrors.wife_address = "Address is required";
+        if (!formData.wife_father_name.trim()) newErrors.wife_father_name = "Father's name is required";
+        if (!formData.wife_father_citizenship.trim()) newErrors.wife_father_citizenship = "Father's citizenship is required";
+        if (!formData.wife_mother_name.trim()) newErrors.wife_mother_name = "Mother's name is required";
+        if (!formData.wife_mother_citizenship.trim()) newErrors.wife_mother_citizenship = "Mother's citizenship is required";
         break;
 
-      case 6: // Attendant Information
-        if (!formData.attendant_type)
-          newErrors.attendant_type = "Attendant type is required";
-        if (!formData.attendant_name.trim())
-          newErrors.attendant_name = "Attendant name is required";
-        if (!formData.attendant_certification.trim())
-          newErrors.attendant_certification = "Certification is required";
-        if (!formData.attendant_address.trim())
-          newErrors.attendant_address = "Address is required";
-        if (!formData.attendant_title.trim())
-          newErrors.attendant_title = "Title is required";
+      case 4: // Ceremony Details
+        if (!formData.officiating_officer.trim()) newErrors.officiating_officer = "Officiating officer is required";
         break;
 
-      case 7: // Informant Information
-        if (!formData.informant_first_name.trim())
-          newErrors.informant_first_name = "First name is required";
-        if (!formData.informant_last_name.trim())
-          newErrors.informant_last_name = "Last name is required";
-        if (!formData.informant_relationship.trim())
-          newErrors.informant_relationship = "Relationship is required";
-        if (!formData.informant_address.trim())
-          newErrors.informant_address = "Address is required";
-        if (!formData.informant_certification_accepted)
-          newErrors.informant_certification_accepted =
-            "Certification must be accepted";
+      case 5: // Witness Information
+        if (!formData.witness1_name.trim()) newErrors.witness1_name = "Witness 1 name is required";
+        if (!formData.witness1_address.trim()) newErrors.witness1_address = "Witness 1 address is required";
+        if (!formData.witness2_name.trim()) newErrors.witness2_name = "Witness 2 name is required";
+        if (!formData.witness2_address.trim()) newErrors.witness2_address = "Witness 2 address is required";
         break;
 
-      case 8: // Finalize
+      case 6: // Finalize
         // No validation needed for final step, just confirmation
         break;
     }
@@ -509,7 +480,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
 
     const confirmation = await showAlert.confirm(
       "Confirm Submission",
-      "Are you sure you want to save this birth record? This action cannot be undone.",
+      "Are you sure you want to save this marriage record? This action cannot be undone.",
       "Yes, Save Record",
       "Review Details"
     );
@@ -519,13 +490,13 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
     // Show processing alert for loading state
     showAlert.processing(
       "Saving Record",
-      "Please wait while we save the birth record..."
+      "Please wait while we save the marriage record..."
     );
     setLoading(true);
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_LARAVEL_API}/birth-records`,
+        `${import.meta.env.VITE_LARAVEL_API}/marriage-records`,
         {
           method: "POST",
           headers: {
@@ -543,7 +514,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
         // Close the processing alert
         showAlert.close();
 
-        showToast.success("Birth record saved successfully!");
+        showToast.success("Marriage record saved successfully!");
 
         setHasUnsavedChanges(false);
 
@@ -565,15 +536,15 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
           );
           setErrors(data.errors);
         } else {
-          throw new Error(data.message || "Failed to save birth record");
+          throw new Error(data.message || "Failed to save marriage record");
         }
       }
     } catch (error) {
       // Close the processing alert
       showAlert.close();
 
-      console.error("Error saving birth record:", error);
-      showAlert.error("Error", error.message || "Failed to save birth record");
+      console.error("Error saving marriage record:", error);
+      showAlert.error("Error", error.message || "Failed to save marriage record");
     } finally {
       setLoading(false);
     }
@@ -619,7 +590,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
     switch (currentStep) {
       case 1:
         return (
-          <Step1ChildInfo
+          <Step1BasicInfo
             formData={formData}
             errors={errors}
             onChange={handleInputChange}
@@ -627,7 +598,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
         );
       case 2:
         return (
-          <Step2MotherInfo
+          <Step2HusbandInfo
             formData={formData}
             errors={errors}
             onChange={handleInputChange}
@@ -635,7 +606,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
         );
       case 3:
         return (
-          <Step3FatherInfo
+          <Step3WifeInfo
             formData={formData}
             errors={errors}
             onChange={handleInputChange}
@@ -643,7 +614,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
         );
       case 4:
         return (
-          <Step4ParentsMarriage
+          <Step4CeremonyDetails
             formData={formData}
             errors={errors}
             onChange={handleInputChange}
@@ -651,30 +622,14 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
         );
       case 5:
         return (
-          <Step5BirthDetails
+          <Step5WitnessInfo
             formData={formData}
             errors={errors}
             onChange={handleInputChange}
           />
         );
       case 6:
-        return (
-          <Step6AttendantInfo
-            formData={formData}
-            errors={errors}
-            onChange={handleInputChange}
-          />
-        );
-      case 7:
-        return (
-          <Step7InformantInfo
-            formData={formData}
-            errors={errors}
-            onChange={handleInputChange}
-          />
-        );
-      case 8:
-        return <Step8Finalize formData={formData} />;
+        return <Step6Finalize formData={formData} />;
       default:
         return null;
     }
@@ -696,12 +651,12 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
           >
             {/* Header */}
             <div
-              id="birth-record-modal-header"
+              id="marriage-record-modal-header"
               className="modal-header border-0 text-white"
             >
               <h5 className="modal-title fw-bold">
                 <i className="fas fa-plus me-2"></i>
-                Add New Birth Record
+                Add New Marriage Record
               </h5>
               <button
                 type="button"
@@ -812,7 +767,7 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
                 </div>
                 <h5 className="mb-2">Saving Record</h5>
                 <p className="text-muted mb-0">
-                  Please wait while we save the birth record...
+                  Please wait while we save the marriage record...
                 </p>
               </div>
             </div>
@@ -822,35 +777,35 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
 
       <style>{`
   /* Force solid color header with maximum specificity */
-  #birth-record-modal-header {
+  #marriage-record-modal-header {
     background: #018181 !important;
     background-image: none !important;
     background-color: #018181 !important;
   }
   
   /* Override any potential gradient from parent or Bootstrap classes */
-  .modal-header#birth-record-modal-header {
+  .modal-header#marriage-record-modal-header {
     background: #018181 !important;
     background-image: none !important;
     background-color: #018181 !important;
   }
   
   /* Nuclear option - target any modal header with this ID */
-  div#birth-record-modal-header.modal-header {
+  div#marriage-record-modal-header.modal-header {
     background: #018181 !important;
     background-image: none !important;
     background-color: #018181 !important;
   }
   
   /* Remove any gradient images or overlays */
-  #birth-record-modal-header::before,
-  #birth-record-modal-header::after {
+  #marriage-record-modal-header::before,
+  #marriage-record-modal-header::after {
     display: none !important;
     background-image: none !important;
   }
   
   /* Ensure no background images are applied */
-  #birth-record-modal-header {
+  #marriage-record-modal-header {
     background-image: none !important;
   }
 
@@ -1069,4 +1024,4 @@ const AddBirthRecordModal = ({ onClose, onSave, token }) => {
   );
 };
 
-export default AddBirthRecordModal;
+export default AddMarriageRecordModal;

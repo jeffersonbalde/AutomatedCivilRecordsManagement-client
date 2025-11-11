@@ -1,13 +1,12 @@
-// src/pages/BirthRecords/BirthRecords.jsx - FIXED VERSION
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
 import { showAlert, showToast } from "../../../services/notificationService";
-import BirthRecordsTable from "./BirthRecordsTable";
-import AddBirthRecordModal from "./AddBirthRecordModal";
-import EditBirthRecordModal from "./EditBirthRecordModal";
-import ViewBirthRecordModal from "./ViewBirthRecordModal";
+import MarriageRecordsTable from "./MarriageRecordsTable";
+import AddMarriageRecordModal from "./AddMarriageRecordModal";
+import EditMarriageRecordModal from "./EditMarriageRecordModal";
+import ViewMarriageRecordModal from "./ViewMarriageRecordModal";
 
-const BirthRecords = () => {
+const MarriageRecords = () => {
   const { token } = useAuth();
   const [allRecords, setAllRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
@@ -41,7 +40,7 @@ const BirthRecords = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_LARAVEL_API}/birth-records?per_page=1000`,
+        `${import.meta.env.VITE_LARAVEL_API}/marriage-records?per_page=1000`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -54,11 +53,11 @@ const BirthRecords = () => {
         const data = await response.json();
         setAllRecords(data.data || []);
       } else {
-        throw new Error("Failed to fetch birth records");
+        throw new Error("Failed to fetch marriage records");
       }
     } catch (error) {
-      console.error("Error fetching birth records:", error);
-      showAlert.error("Error", "Failed to load birth records");
+      console.error("Error fetching marriage records:", error);
+      showAlert.error("Error", "Failed to load marriage records");
       setAllRecords([]);
     } finally {
       setLoading(false);
@@ -69,7 +68,7 @@ const BirthRecords = () => {
     setStatisticsLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_LARAVEL_API}/birth-records/statistics`,
+        `${import.meta.env.VITE_LARAVEL_API}/marriage-records/statistics/overview`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -95,21 +94,23 @@ const BirthRecords = () => {
 
   const calculateStatisticsFromLocalData = () => {
     const totalRecords = allRecords.length;
-    const maleCount = allRecords.filter(record => record.sex === 'Male').length;
-    const femaleCount = allRecords.filter(record => record.sex === 'Female').length;
     
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     const thisMonth = allRecords.filter(record => {
-      const recordDate = new Date(record.date_of_birth || record.created_at);
+      const recordDate = new Date(record.date_of_marriage || record.created_at);
       return recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear;
+    }).length;
+
+    const thisYear = allRecords.filter(record => {
+      const recordDate = new Date(record.date_of_marriage || record.created_at);
+      return recordDate.getFullYear() === currentYear;
     }).length;
 
     setStatistics({
       total_records: totalRecords,
-      male_count: maleCount,
-      female_count: femaleCount,
-      this_month: thisMonth
+      this_month: thisMonth,
+      this_year: thisYear
     });
   };
 
@@ -129,17 +130,15 @@ const BirthRecords = () => {
       const loweredSearch = searchTerm.toLowerCase().trim();
       filtered = filtered.filter(record => {
         const searchableFields = [
-          record.child_first_name,
-          record.child_middle_name,
-          record.child_last_name,
+          record.husband_first_name,
+          record.husband_middle_name,
+          record.husband_last_name,
+          record.wife_first_name,
+          record.wife_middle_name,
+          record.wife_last_name,
           record.registry_number,
-          record.place_of_birth,
-          record.birth_address_city,
-          record.birth_address_barangay,
-          record.mother?.first_name,
-          record.mother?.last_name,
-          record.father?.first_name,
-          record.father?.last_name,
+          record.place_of_marriage,
+          record.license_number,
         ].filter(Boolean);
 
         return searchableFields.some(field => 
@@ -151,7 +150,7 @@ const BirthRecords = () => {
     // Date range filter
     if (dateFrom) {
       filtered = filtered.filter(record => {
-        const recordDate = new Date(record.date_of_birth);
+        const recordDate = new Date(record.date_of_marriage);
         const fromDate = new Date(dateFrom);
         return recordDate >= fromDate;
       });
@@ -159,7 +158,7 @@ const BirthRecords = () => {
 
     if (dateTo) {
       filtered = filtered.filter(record => {
-        const recordDate = new Date(record.date_of_birth);
+        const recordDate = new Date(record.date_of_marriage);
         const toDate = new Date(dateTo);
         toDate.setHours(23, 59, 59, 999);
         return recordDate <= toDate;
@@ -205,14 +204,14 @@ const BirthRecords = () => {
   };
 
   const handleRecordSaved = (newRecord) => {
-    console.log("Record saved successfully");
+    console.log("Marriage record saved successfully");
     setShowAddModal(false);
     setAllRecords(prev => [newRecord, ...prev]);
     fetchStatistics();
   };
 
   const handleRecordUpdated = (updatedRecord) => {
-    console.log("Record updated successfully");
+    console.log("Marriage record updated successfully");
     setShowEditModal(false);
     setSelectedRecord(null);
     setAllRecords(prev => 
@@ -223,56 +222,56 @@ const BirthRecords = () => {
     fetchStatistics();
   };
 
-const handleDeleteRecord = async (recordId, recordName = "this record") => {
-  const confirmation = await showAlert.confirm(
-    "Delete Birth Record",
-    `Are you sure you want to delete ${recordName}? This action cannot be undone.`,
-    "Yes, Delete",
-    "Cancel",
-    "warning"
-  );
-
-  if (!confirmation.isConfirmed) return;
-
-  // Show processing alert with loading state
-  showAlert.processing("Deleting Record", "Please wait while we delete the birth record...");
-
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_LARAVEL_API}/birth-records/${recordId}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-      }
+  const handleDeleteRecord = async (recordId, recordName = "this record") => {
+    const confirmation = await showAlert.confirm(
+      "Delete Marriage Record",
+      `Are you sure you want to delete ${recordName}? This action cannot be undone.`,
+      "Yes, Delete",
+      "Cancel",
+      "warning"
     );
 
-    if (response.ok) {
+    if (!confirmation.isConfirmed) return;
+
+    // Show processing alert with loading state
+    showAlert.processing("Deleting Record", "Please wait while we delete the marriage record...");
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_LARAVEL_API}/marriage-records/${recordId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Close the processing alert
+        showAlert.close();
+        
+        showToast.success("Marriage record deleted successfully!");
+        
+        // Update state
+        setAllRecords(prev => prev.filter(record => record.id !== recordId));
+        fetchStatistics();
+        
+      } else {
+        // Close the processing alert
+        showAlert.close();
+        
+        throw new Error("Failed to delete marriage record");
+      }
+    } catch (error) {
       // Close the processing alert
       showAlert.close();
       
-      showToast.success("Birth record deleted successfully!");
-      
-      // Update state
-      setAllRecords(prev => prev.filter(record => record.id !== recordId));
-      fetchStatistics();
-      
-    } else {
-      // Close the processing alert
-      showAlert.close();
-      
-      throw new Error("Failed to delete birth record");
+      console.error("Error deleting marriage record:", error);
+      showAlert.error("Error", "Failed to delete marriage record");
     }
-  } catch (error) {
-    // Close the processing alert
-    showAlert.close();
-    
-    console.error("Error deleting birth record:", error);
-    showAlert.error("Error", "Failed to delete birth record");
-  }
-};
+  };
 
   const clearFilters = () => {
     setSearchTerm("");
@@ -287,7 +286,7 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
 
   // Skeleton Loader for Statistics Cards
   const StatisticsCardSkeleton = () => (
-    <div className="col-6 col-md-3">
+    <div className="col-6 col-md-4">
       <div className="card stats-card h-100 border-0 shadow-sm">
         <div className="card-body p-3">
           <div className="d-flex align-items-center">
@@ -309,9 +308,9 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
       {/* Page Header */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div className="flex-grow-1">
-          <h1 className="h3 mb-1 text-dark">Birth Records Management</h1>
+          <h1 className="h3 mb-1 text-dark">Marriage Records Management</h1>
           <p className="text-muted mb-0">
-            Manage and view all birth certificate records
+            Manage and view all marriage certificate records
             {filteredRecords.length !== allRecords.length && (
               <span className="text-info ms-2">
                 (Showing {filteredRecords.length} of {allRecords.length} records)
@@ -321,7 +320,7 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
         </div>
         <div className="d-flex align-items-center gap-2 flex-wrap">
           <div className="badge px-3 py-2 text-white" style={{ backgroundColor: "#018181" }}>
-            <i className="fas fa-baby me-2"></i>
+            <i className="fas fa-ring me-2"></i>
             Total Records: {loading ? "..." : allRecords.length}
           </div>
           <button
@@ -332,7 +331,7 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
               borderColor: "#018181",
             }}
           >
-            <i className="fas fa-plus me-2"></i>Add Birth Record
+            <i className="fas fa-plus me-2"></i>Add Marriage Record
           </button>
           <button
             className="btn btn-outline-secondary"
@@ -354,11 +353,10 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
             <StatisticsCardSkeleton />
             <StatisticsCardSkeleton />
             <StatisticsCardSkeleton />
-            <StatisticsCardSkeleton />
           </>
         ) : statistics ? (
           <>
-            <div className="col-6 col-md-3">
+            <div className="col-6 col-md-4">
               <div className="card stats-card h-100 border-0 shadow-sm">
                 <div className="card-body p-3">
                   <div className="d-flex align-items-center">
@@ -367,52 +365,37 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
                       <div className="h4 mb-0 fw-bold" style={{ color: "#018181" }}>{statistics.total_records || 0}</div>
                     </div>
                     <div className="col-auto">
-                      <i className="fas fa-baby fa-lg" style={{ color: "#018181", opacity: "0.7" }}></i>
+                      <i className="fas fa-ring fa-lg" style={{ color: "#018181", opacity: "0.7" }}></i>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="col-6 col-md-3">
+            <div className="col-6 col-md-4">
               <div className="card stats-card h-100 border-0 shadow-sm">
                 <div className="card-body p-3">
                   <div className="d-flex align-items-center">
                     <div className="flex-grow-1">
-                      <div className="text-xs fw-semibold text-uppercase mb-1 text-success">Male</div>
-                      <div className="h4 mb-0 fw-bold text-success">{statistics.male_count || 0}</div>
+                      <div className="text-xs fw-semibold text-uppercase mb-1 text-success">This Month</div>
+                      <div className="h4 mb-0 fw-bold text-success">{statistics.this_month || 0}</div>
                     </div>
                     <div className="col-auto">
-                      <i className="fas fa-male fa-lg text-success opacity-70"></i>
+                      <i className="fas fa-calendar-alt fa-lg text-success opacity-70"></i>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="col-6 col-md-3">
+            <div className="col-6 col-md-4">
               <div className="card stats-card h-100 border-0 shadow-sm">
                 <div className="card-body p-3">
                   <div className="d-flex align-items-center">
                     <div className="flex-grow-1">
-                      <div className="text-xs fw-semibold text-uppercase mb-1 text-info">Female</div>
-                      <div className="h4 mb-0 fw-bold text-info">{statistics.female_count || 0}</div>
+                      <div className="text-xs fw-semibold text-uppercase mb-1 text-info">This Year</div>
+                      <div className="h4 mb-0 fw-bold text-info">{statistics.this_year || 0}</div>
                     </div>
                     <div className="col-auto">
-                      <i className="fas fa-female fa-lg text-info opacity-70"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-6 col-md-3">
-              <div className="card stats-card h-100 border-0 shadow-sm">
-                <div className="card-body p-3">
-                  <div className="d-flex align-items-center">
-                    <div className="flex-grow-1">
-                      <div className="text-xs fw-semibold text-uppercase mb-1 text-warning">This Month</div>
-                      <div className="h4 mb-0 fw-bold text-warning">{statistics.this_month || 0}</div>
-                    </div>
-                    <div className="col-auto">
-                      <i className="fas fa-calendar-alt fa-lg text-warning opacity-70"></i>
+                      <i className="fas fa-calendar fa-lg text-info opacity-70"></i>
                     </div>
                   </div>
                 </div>
@@ -421,7 +404,6 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
           </>
         ) : (
           <>
-            <StatisticsCardSkeleton />
             <StatisticsCardSkeleton />
             <StatisticsCardSkeleton />
             <StatisticsCardSkeleton />
@@ -444,7 +426,7 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
                 <input
                   type="text"
                   className="form-control border-start-0"
-                  placeholder="Search by name, registry number, place..."
+                  placeholder="Search by names, registry number, place..."
                   value={searchTerm}
                   onChange={handleSearchChange}
                 />
@@ -504,7 +486,6 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
             <div className="row mt-3">
               <div className="col-12">
                 <div className="d-flex align-items-center gap-2 flex-wrap">
-
                   <button
                     className="btn btn-sm btn-outline-secondary"
                     onClick={clearFilters}
@@ -522,7 +503,7 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
       </div>
 
       {/* Records Table */}
-      <BirthRecordsTable
+      <MarriageRecordsTable
         records={paginationInfo}
         loading={loading}
         onViewRecord={handleViewRecord}
@@ -535,7 +516,7 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
 
       {/* Modals */}
       {showAddModal && (
-        <AddBirthRecordModal
+        <AddMarriageRecordModal
           onClose={() => setShowAddModal(false)}
           onSave={handleRecordSaved}
           token={token}
@@ -543,7 +524,7 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
       )}
 
       {showEditModal && selectedRecord && (
-        <EditBirthRecordModal
+        <EditMarriageRecordModal
           record={selectedRecord}
           onClose={() => {
             setShowEditModal(false);
@@ -555,7 +536,7 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
       )}
 
       {showViewModal && selectedRecord && (
-        <ViewBirthRecordModal
+        <ViewMarriageRecordModal
           record={selectedRecord}
           onClose={() => {
             setShowViewModal(false);
@@ -567,4 +548,4 @@ const handleDeleteRecord = async (recordId, recordName = "this record") => {
   );
 };
 
-export default BirthRecords;
+export default MarriageRecords;
