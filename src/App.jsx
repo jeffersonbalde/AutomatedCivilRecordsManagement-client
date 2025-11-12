@@ -21,12 +21,12 @@ import UserManagement from "./pages/Admin/UserManagement/UserManagement";
 import BirthRecords from "./pages/Unified/BirthRecords/BirthRecords";
 import MarriageRecords from "./pages/Unified/MarriageRecords/MarriageRecords";
 import DeathRecords from "./pages/Unified/DeathRecords/DeathRecords";
+import GenerateCertificates from "./pages/Unified/GenerateCertificates/GenerateCertificates";
+import Reports from "./pages/Unified/Reports/Reports";
+import Backup from "./pages/Unified/Backup/Backup";
+import BirthCertificate from "./pages/Unified/GenerateCertificates/BirthCertificate";
 
-const SearchRecords = () => <div>Search Records</div>;
-const GenerateCertificates = () => <div>Generate Certificates</div>;
 const IssuanceHistory = () => <div>Issuance History</div>;
-const Reports = () => <div>Reports & Analytics</div>;
-const Backup = () => <div>Data Backup</div>;
 
 // Role-based component selectors
 const RoleBasedProfile = () => {
@@ -75,7 +75,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Records Management Routes */}
+      {/* Records Management Routes - Accessible to both Admin and Staff */}
       <Route
         path="/birth-records"
         element={
@@ -106,18 +106,8 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/search-records"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <SearchRecords />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
 
-      {/* Certificate Management Routes */}
+      {/* Certificate Management Routes - Accessible to both Admin and Staff */}
       <Route
         path="/generate-certificates"
         element={
@@ -139,7 +129,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Admin Only Routes */}
+      {/* Admin Only Routes - System Administration */}
       <Route
         path="/user-management"
         element={

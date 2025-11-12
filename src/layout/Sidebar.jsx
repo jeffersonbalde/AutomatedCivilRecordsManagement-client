@@ -1,4 +1,4 @@
-// Sidebar.jsx - Updated with grouped staff menu items
+// Sidebar.jsx - Updated with proper role-based menu items
 import React from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useLocation, Link } from "react-router-dom";
@@ -21,7 +21,7 @@ const Sidebar = ({ onCloseSidebar }) => {
     closeSidebarOnMobile();
   };
 
-  // Civil Registry System Menu Items
+  // Civil Registry System Menu Items for Admin
   const adminMenuItems = [
     {
       heading: "Dashboard",
@@ -50,11 +50,6 @@ const Sidebar = ({ onCloseSidebar }) => {
           icon: "fas fa-cross",
           label: "Death Records",
           href: "/death-records",
-        },
-        {
-          icon: "fas fa-search",
-          label: "Search Records",
-          href: "/search-records",
         },
       ],
     },
@@ -95,6 +90,7 @@ const Sidebar = ({ onCloseSidebar }) => {
     },
   ];
 
+  // Civil Registry System Menu Items for Staff
   const staffMenuItems = [
     {
       heading: "Dashboard",
@@ -124,11 +120,6 @@ const Sidebar = ({ onCloseSidebar }) => {
           label: "Death Records",
           href: "/death-records",
         },
-        {
-          icon: "fas fa-search",
-          label: "Search Records",
-          href: "/search-records",
-        },
       ],
     },
     {
@@ -146,6 +137,7 @@ const Sidebar = ({ onCloseSidebar }) => {
         },
       ],
     },
+    // NOTE: System Administration section is completely removed for staff
   ];
 
   let menuItems = [];
