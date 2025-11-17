@@ -1,31 +1,8 @@
 // src/pages/Unified/GenerateCertificates/components/CertificatePreview.jsx
 import React from "react";
-import Portal from "../../../components/Portal";
 
 const CertificatePreview = ({ certificateData, onClose, onGenerate }) => {
   const { template_data, certificate_type } = certificateData;
-
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleEscapeKey = (e) => {
-    if (e.key === "Escape") {
-      onClose();
-    }
-  };
-
-  React.useEffect(() => {
-    document.addEventListener("keydown", handleEscapeKey);
-    document.body.classList.add("modal-open");
-    
-    return () => {
-      document.removeEventListener("keydown", handleEscapeKey);
-      document.body.classList.remove("modal-open");
-    };
-  }, []);
 
   const renderBirthCertificate = () => (
     <div className="certificate-preview border p-4 bg-white">
@@ -381,73 +358,38 @@ const CertificatePreview = ({ certificateData, onClose, onGenerate }) => {
   };
 
   return (
-    <Portal>
-      <div 
-        className="modal fade show d-block"
-        style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
-        onClick={handleBackdropClick}
-        tabIndex="-1"
-      >
-        <div className="modal-dialog modal-xl modal-dialog-centered mx-3 mx-sm-auto">
-          <div 
-            className="modal-content border-0"
-            style={{ 
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-            }}
-          >
-            <div 
-              id="certificate-preview-header"
-              className="modal-header border-0 text-white"
+    <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      <div className="modal-dialog modal-xl modal-dialog-centered">
+        <div className="modal-content">
+          <div className="modal-header text-white" style={{ backgroundColor: "#018181" }}>
+            <h5 className="modal-title">
+              <i className="fas fa-eye me-2"></i>
+              Certificate Preview - {certificate_type.toUpperCase()}
+            </h5>
+            <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
+          </div>
+          <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+            {renderCertificate()}
+          </div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
+              <i className="fas fa-times me-2"></i>Close
+            </button>
+            <button
+              type="button"
+              className="btn btn-success"
+              onClick={onGenerate}
+              style={{
+                backgroundColor: "#018181",
+                borderColor: "#018181",
+              }}
             >
-              <h5 className="modal-title fw-bold">
-                <i className="fas fa-eye me-2"></i>
-                Certificate Preview - {certificate_type.toUpperCase()}
-              </h5>
-              <button 
-                type="button" 
-                className="btn-close btn-close-white" 
-                onClick={onClose}
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body bg-light" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-              {renderCertificate()}
-            </div>
-            <div className="modal-footer border-top bg-white">
-              <button 
-                type="button" 
-                className="btn btn-outline-secondary" 
-                onClick={onClose}
-              >
-                <i className="fas fa-times me-2"></i>Close
-              </button>
-              <button
-                type="button"
-                className="btn fw-semibold"
-                onClick={onGenerate}
-                style={{
-                  backgroundColor: "#018181",
-                  borderColor: "#018181",
-                  color: "white",
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#016767"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#018181"}
-              >
-                <i className="fas fa-print me-2"></i>Generate Certificate
-              </button>
-            </div>
+              <i className="fas fa-print me-2"></i>Generate Certificate
+            </button>
           </div>
         </div>
       </div>
-
-      <style>{`
-        #certificate-preview-header {
-          background: #018181 !important;
-          background-color: #018181 !important;
-          background-image: none !important;
-        }
-      `}</style>
-    </Portal>
+    </div>
   );
 };
 

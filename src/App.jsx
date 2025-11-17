@@ -24,9 +24,8 @@ import DeathRecords from "./pages/Unified/DeathRecords/DeathRecords";
 import GenerateCertificates from "./pages/Unified/GenerateCertificates/GenerateCertificates";
 import Reports from "./pages/Unified/Reports/Reports";
 import Backup from "./pages/Unified/Backup/Backup";
-import BirthCertificate from "./pages/Unified/GenerateCertificates/BirthCertificate";
-
-const IssuanceHistory = () => <div>Issuance History</div>;
+import IssuanceHistory from "./pages/Unified/IssuanceHistory/IssuanceHistory";
+import DocumentScanning from "./pages/Unified/DocumentScanning/DocumentScanning";
 
 // Role-based component selectors
 const RoleBasedProfile = () => {
@@ -178,6 +177,17 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <Layout>
               <RoleBasedSettings />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/document-scanning"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <DocumentScanning />
             </Layout>
           </ProtectedRoute>
         }

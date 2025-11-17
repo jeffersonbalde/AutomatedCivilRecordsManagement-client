@@ -37,6 +37,11 @@ const Sidebar = ({ onCloseSidebar }) => {
       heading: "Records Management",
       items: [
         {
+          icon: "fas fa-camera",
+          label: "Document Scanning", 
+          href: "/document-scanning",
+        },
+        {
           icon: "fas fa-birthday-cake",
           label: "Birth Records",
           href: "/birth-records",
@@ -105,6 +110,11 @@ const Sidebar = ({ onCloseSidebar }) => {
     {
       heading: "Records Management",
       items: [
+        {
+          icon: "fas fa-camera",
+          label: "Document Scanning", 
+          href: "/document-scanning",
+        },
         {
           icon: "fas fa-birthday-cake",
           label: "Birth Records",
